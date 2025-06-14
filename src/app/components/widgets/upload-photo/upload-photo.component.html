@@ -123,11 +123,11 @@
         </div>
 
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
-            <mat-checkbox class="exif-label" [name]="'parameters' + internalIndex" color="primary" [disableRipple]="true" [(ngModel)]="photo().showMake">
+            <mat-checkbox class="exif-label" [name]="'parameters' + internalIndex" color="primary" [disableRipple]="true" [(ngModel)]="photo().showParameters">
                 <span class="text-muted">Parameters:</span>
             </mat-checkbox>
             <mat-form-field appearance="outline" class="flex-grow-2">
-                <input matInput [name]="'inputParameters' + internalIndex" [(ngModel)]="photo().make" [disabled]="!photo().showMake" aria-label="Parameters" />
+                <input matInput [name]="'inputParameters' + internalIndex" [(ngModel)]="photo().parameters" [disabled]="!photo().showParameters" aria-label="Parameters" />
             </mat-form-field>
         </div>
 
