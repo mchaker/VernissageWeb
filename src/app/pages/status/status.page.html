@@ -329,6 +329,11 @@
             } }
           </div>
 
+          <!-- Status properties -->
+          <app-status-properties
+            [status]="mainStatusInternal"
+          ></app-status-properties>
+
           <!-- User card -->
           <app-user-card [user]="mainStatusInternal.user"></app-user-card>
 
@@ -341,11 +346,6 @@
               [innerHTML]="rendered()"
             ></div>
           </div>
-
-          <!-- Status properties -->
-          <app-status-properties
-            [status]="mainStatusInternal"
-          ></app-status-properties>
 
           <!-- Alt text -->
           @if (showAlternativeText() && altStatus()) {
