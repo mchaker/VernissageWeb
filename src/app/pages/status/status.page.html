@@ -432,7 +432,7 @@
           <!-- Exif -->
           @if (exif(); as exifInternal) {
           <div class="exif">
-            @if (exifInternal.parameters || exifInternal.parameters) {
+            @if (exifInternal.parameters) {
             <div class="margin-bottom-10">
               <mat-icon
                 class="margin-right-20"
@@ -445,7 +445,7 @@
                   >{{ exifInternal.parameters }}</span
                 >
               </span>
-            @if (exifInternal.workflow || exifInternal.workflow) {
+            @if (exifInternal.workflow) {
             <div class="margin-bottom-10">
               <mat-icon
                 class="margin-right-20"
