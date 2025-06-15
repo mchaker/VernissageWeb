@@ -423,7 +423,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         uploadPhoto.description = caption.trim();
       }
 
-      const parameters = tags["Parameters"]?.description.toString();
+      const parameters = tags["parameters"]?.description.toString();
       if (parameters) {
         uploadPhoto.parameters = parameters;
         uploadPhoto.showParameters = true;
