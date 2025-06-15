@@ -259,6 +259,10 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
           temporaryAttachment.parameters = photo.parameters;
         }
 
+        if (photo.showWorkflow) {
+          temporaryAttachment.workflow = photo.workflow;
+        }
+
         if (photo.showMake) {
           temporaryAttachment.make = photo.make;
         }
@@ -427,6 +431,12 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
       if (parameters) {
         uploadPhoto.parameters = parameters;
         uploadPhoto.showParameters = true;
+      }
+
+      const workflow = tags["workflow"]?.description.toString();
+      if (workflow) {
+        uploadPhoto.workflow = workflow;
+        uploadPhoto.showWorkflow = true;
       }
 
       const make = tags["Make"]?.description.toString();

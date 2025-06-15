@@ -132,6 +132,15 @@
         </div>
 
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
+            <mat-checkbox class="exif-label" [name]="'workflow' + internalIndex" color="primary" [disableRipple]="true" [(ngModel)]="photo().showWorkflow">
+                <span class="text-muted">Workflow:</span>
+            </mat-checkbox>
+            <mat-form-field appearance="outline" class="flex-grow-2">
+                <input matInput [name]="'inputWorkflow' + internalIndex" [(ngModel)]="photo().workflow" [disabled]="!photo().showWorkflow" aria-label="Workflow" />
+            </mat-form-field>
+        </div>
+
+        <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'make' + internalIndex" color="primary" [disableRipple]="true" [(ngModel)]="photo().showMake">
                 <span class="text-muted">Manufacturer:</span>
             </mat-checkbox>

@@ -440,6 +440,19 @@
                   >{{ exifInternal.parameters }}</span
                 >
               </span>
+            @if (exifInternal.workflow || exifInternal.workflow) {
+            <div class="margin-bottom-10">
+              <mat-icon
+                class="margin-right-20"
+                inline="true"
+                matTooltip="Workflow"
+                >account_tree</mat-icon
+              >
+              <span class="exif-label">
+                <span *ngIf="exifInternal.workflow"
+                  >{{ exifInternal.workflow }}</span
+                >
+              </span>
             </div>
             } @if (exifInternal.make || exifInternal.model) {
             <div class="margin-bottom-10">

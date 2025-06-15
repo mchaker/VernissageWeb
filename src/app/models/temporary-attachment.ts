@@ -5,6 +5,7 @@ export class TemporaryAttachment {
   public description?: string;
   public blurhash?: string;
   public parameters?: string;
+  public workflow?: string;
   public make?: string;
   public model?: string;
   public lens?: string;
