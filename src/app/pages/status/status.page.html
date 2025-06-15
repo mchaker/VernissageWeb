@@ -342,6 +342,11 @@
             ></div>
           </div>
 
+          <!-- Status properties -->
+          <app-status-properties
+            [status]="mainStatusInternal"
+          ></app-status-properties>
+
           <!-- Alt text -->
           @if (showAlternativeText() && altStatus()) {
           <div class="flex-row alt margin-bottom-10">
@@ -609,11 +614,6 @@
             >
           </div>
           }
-
-          <!-- Status properties -->
-          <app-status-properties
-            [status]="mainStatusInternal"
-          ></app-status-properties>
         </mat-card-content>
       </mat-card>
 
