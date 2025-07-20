@@ -162,7 +162,7 @@
       <!-- Left main panel -->
       <mat-card class="flex-grow-3 height-100" appearance="outlined">
         <mat-card-content>
-          <div class="flex-row flex-wrap">
+          <div class="flex-row flex-wrap flex-align-center">
             <!-- Actions panel -->
             @if (isLoggedIn()) {
             <button
@@ -173,6 +173,7 @@
               matTooltip="Boost"
               matTooltipPosition="above"
               aria-label="Boost"
+              [disabled]="isDuringBoostProcessing()"
               (click)="reblog()"
             >
               <mat-icon class="outline-symbol">rocket_launch</mat-icon>
@@ -186,6 +187,7 @@
               matTooltip="Unboost"
               matTooltipPosition="above"
               aria-label="Unboost"
+              [disabled]="isDuringBoostProcessing()"
               (click)="unreblog()"
             >
               <mat-icon class="fill-symbol">rocket_launch</mat-icon>
@@ -199,6 +201,7 @@
               matTooltip="Like"
               matTooltipPosition="above"
               aria-label="Like"
+              [disabled]="isDuringBoostProcessing()"
               (click)="favourite()"
             >
               <mat-icon class="outline-symbol">grade</mat-icon>
@@ -212,6 +215,7 @@
               matTooltip="Unlike"
               matTooltipPosition="above"
               aria-label="Unlike"
+              [disabled]="isDuringBoostProcessing()"
               (click)="unfavourite()"
             >
               <mat-icon class="fill-symbol">grade</mat-icon>
@@ -225,6 +229,7 @@
               matTooltip="Bookmark"
               matTooltipPosition="above"
               aria-label="Bookmark"
+              [disabled]="isDuringBoostProcessing()"
               (click)="bookmark()"
             >
               <mat-icon class="outline-symbol">bookmark</mat-icon>
@@ -238,6 +243,7 @@
               matTooltip="Unbookmark"
               matTooltipPosition="above"
               aria-label="Unbookmark"
+              [disabled]="isDuringBoostProcessing()"
               (click)="unbookmark()"
             >
               <mat-icon class="fill-symbol">bookmark</mat-icon>
@@ -252,6 +258,7 @@
               matTooltip="Feature"
               matTooltipPosition="above"
               aria-label="Feature"
+              [disabled]="isDuringBoostProcessing()"
               (click)="feature()"
             >
               <mat-icon class="outline-symbol">stars</mat-icon>
@@ -265,6 +272,7 @@
               matTooltip="Unfeature"
               matTooltipPosition="above"
               aria-label="Unfeature"
+              [disabled]="isDuringBoostProcessing()"
               (click)="unfeature()"
             >
               <mat-icon class="fill-symbol">stars</mat-icon>
@@ -319,7 +327,14 @@
                 <span>Delete</span>
               </button>
             </mat-menu>
-            }
+
+            @if (isDuringBoostProcessing() || isDuringFavouriteProcessing() ||
+            isDuringBookmarkProcessing() || isDuringFeatureProcessing()) {
+            <mat-spinner
+              class="display-inline-block"
+              [diameter]="18"
+            ></mat-spinner>
+            } }
 
             <div class="flex-spacer"></div>
 
@@ -688,7 +703,7 @@
                   <button
                     *ngIf="comment.status.favourited"
                     mat-menu-item
-                    (click)="unfavouriteComment(comment.status)"
+                    (click)="unFavouriteComment(comment.status)"
                   >
                     <mat-icon>star</mat-icon>
                     <span>Unlike</span>
