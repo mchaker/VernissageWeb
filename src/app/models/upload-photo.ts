@@ -20,6 +20,8 @@ export class UploadPhoto {
     public locationId?: string;
     public licenseId?: string;
 
+    public showParameters = false;
+    public showWorkflow = false;
     public showMake = false;
     public showModel = false;
     public showLens = false;
@@ -35,6 +37,8 @@ export class UploadPhoto {
     public showGpsCoordination = false;
     public showFlash = false;
 
+    public parameters?: string;
+    public workflow?: string;
     public make?: string;
     public model?: string;
     public lens?: string;

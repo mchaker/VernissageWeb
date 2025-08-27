@@ -1,4 +1,6 @@
 export class Exif {
+    public parameters?: string;
+    public workflow?: string;
     public make?: string
     public model?: string;
     public lens?: string;

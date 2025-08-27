@@ -208,6 +208,9 @@
                                 <div id="note" class="note margin-top-10 margin-bottom-20" appNoteProcessor [innerHTML]="rendered()"></div>
                             </div>
 
+                            <!-- Status properties -->
+                            <app-status-properties [status]="mainStatusInternal"></app-status-properties>
+
                             <!-- Alt text -->
                             @if (showAlternativeText() && altStatus()) {
                                 <div class="flex-row alt margin-bottom-10">
@@ -261,6 +264,41 @@
                             <!-- Exif -->
                             @if (exif(); as exifInternal) {
                                 <div class="exif">
+
+                                    <!-- swarm/auto, invoke, novelai-->
+                                    @if (exifInternal.parameters || exifInternal.sd-metadata || exifInternal.comment) {
+                                        <div class="margin-bottom-10">
+                                          <mat-icon
+                                            class="margin-right-20"
+                                            inline="true"
+                                            matTooltip="Parameters"
+                                            >settings_applications</mat-icon
+                                          >
+                                          <span class="exif-label">
+                                            <span *ngIf="exifInternal.parameters"
+                                              >{{ exifInternal.parameters }}</span
+                                            >
+                                          </span>
+                                        </div>
+                                    }
+
+                                    <!-- comfy -->
+                                    @if (exifInternal.workflow) {
+                                        <div class="margin-bottom-10">
+                                          <mat-icon
+                                            class="margin-right-20"
+                                            inline="true"
+                                            matTooltip="Workflow"
+                                            >settings_applications</mat-icon
+                                          >
+                                          <span class="exif-label">
+                                            <span *ngIf="exifInternal.workflow"
+                                              >{{ exifInternal.workflow }}</span
+                                            >
+                                          </span>
+                                        </div>
+                                    }
+
                                     @if (exifInternal.make || exifInternal.model) {
                                         <div class="margin-bottom-10">
                                             <mat-icon class="margin-right-20" inline="true" matTooltip="Camera">camera_alt</mat-icon>
@@ -311,7 +349,7 @@
                                             <span class="exif-label">{{ exifInternal.software }}</span>
                                         </div>
                                     }
-                                    
+
                                     @if (exifInternal.film) {
                                         <div class="margin-bottom-10">
                                             <mat-icon class="margin-right-20" inline="true" matTooltip="Camera roll">camera_roll</mat-icon>
@@ -350,8 +388,6 @@
                                 </div>
                             }
 
-                            <!-- Status properties -->
-                            <app-status-properties [status]="mainStatusInternal"></app-status-properties>
                         </mat-card-content>
                     </mat-card>
 
@@ -422,7 +458,7 @@
                                                 }
                                             </div>
 
-                                            <div class="flex-row flex-responsive gap-horizontal-16 margin-left-40" [ngClass]="{ 'replies': !comment.showDivider }">                                            
+                                            <div class="flex-row flex-responsive gap-horizontal-16 margin-left-40" [ngClass]="{ 'replies': !comment.showDivider }">
                                                 <div class="text-muted fs-80">{{ comment.status.createdAt | ago }}</div>
                                                 <div class="text-muted fs-80" >
                                                     @if (comment.status.favouritesCount > 0) {
@@ -447,7 +483,7 @@
                                 @if ((comments()?.length ?? 0) === 0) {
                                     <div>There is nothing to read here yet.</div>
                                 }
-                                
+
                             </mat-card-content>
                         </mat-card>
 
