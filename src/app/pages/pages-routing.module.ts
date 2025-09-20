@@ -46,6 +46,8 @@ import { SharedCardPublicPage } from './shared-card-public/shared-card-public.pa
 import { ArticleEditPage } from './article-edit/article-edit.page';
 import { NewsPreviewPage } from './news-preview/news-preview.page';
 import { FrequentlyAskedQuestionsPage } from './frequently-asked-questions/frequently-asked-questions.page';
+import { StatusEventsPage } from './status-events/status-events.page';
+import { StatusEventItemsPage } from './status-event-items/status-event-items.page';
 
 const routes: Routes = [
     { path: 'login', component: LoginPage, canActivate: [ loggedOutGuard ], title: 'Fartgram - Login' },
@@ -101,6 +103,8 @@ const routes: Routes = [
     ]},
     { path: ':userName/:id', component: StatusPage },
     { path: 'statuses/:id/edit', component: UploadPage, canActivate: [ authorizationGuard ], title: 'Fartgram - Upload images' },
+    { path: 'statuses/:id/events', component: StatusEventsPage, canActivate: [ authorizationGuard ], title: 'Fartgram - Status events' },
+    { path: 'statuses/:id/events/:eventId/items', component: StatusEventItemsPage, canActivate: [ authorizationGuard ], title: 'Fartgram - Event recipients' },
     { path: 'statuses/:id', component: StatusPage },
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: '**', component: PageNotFoundPage }
