@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, model, OnInit, signal, viewChild } from '@angular/core';
+import { HttpEventType } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { encode } from 'blurhash';
 import * as ExifReader from 'exifreader';
@@ -29,6 +30,8 @@ import { AccountService } from 'src/app/services/http/account.service';
 import { LoadingService } from 'src/app/services/common/loading.service';
 import { AuthorizationService } from 'src/app/services/authorization/authorization.service';
 import { ForbiddenError } from 'src/app/errors/forbidden-error';
+import { CanonExifService } from 'src/app/services/common/canon-exif.service';
+import { DeviceDetectorService, DeviceType } from 'ngx-device-detector';
 
 @Component({
     selector: 'app-upload',
@@ -50,7 +53,6 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     protected commentsDisabled = model(false);
     protected isSensitive = model(false);
     protected contentWarning = model('');
-    protected maxFileSizeString = model('');
     protected selectedIndex = model(0);
     protected isCanceling = signal(false);
     protected emailHasBeenVerified = signal(false);
@@ -61,14 +63,19 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     protected isOpenAIEnabled = signal(false);
     protected hashtagsInProgress = signal(false);
     protected isEditMode = signal(false);
+    protected maxFileSizeString = signal('');
 
     protected allPhotosUploaded = computed(() => !this.photos().some(x => !x.isUploaded() || (x.photoHdrFile && !x.isHdrUploaded)));
+    protected photoFileUpload = viewChild<ElementRef<HTMLInputElement>>('photoFileUpload');
+    protected isAndroidDevice = computed(() => this.deviceDetectorService.os().toLocaleLowerCase() === 'android');
 
     private maxFileSize = 0;
     private statusId = '';
     private readonly defaultMaxFileSize = 10485760;
     private readonly defaultMaxMediaAttachments = 4;
     private readonly defaultMaxCharacters = 500;
+    private readonly imageResizeLongerEdge = 4096;
+    private readonly imageResizeJpegQuality = 0.9;
 
     private messageService = inject(MessagesService);
     private attachmentsService = inject(AttachmentsService);
@@ -87,6 +94,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     private accountService = inject(AccountService);
     private loadingService = inject(LoadingService);
     private authorizationService = inject(AuthorizationService);
+    private canonExifService = inject(CanonExifService);
+    private deviceDetectorService = inject(DeviceDetectorService);
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
@@ -123,41 +132,40 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             return;
         }
 
-        if (file.size > this.maxFileSize) {
-            this.messageService.showError(`Uploaded file is too large. Maximum size is ${this.maxFileSizeString()}.`);
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        const isSupportedType = file.type === 'image/jpeg' || file.type === 'image/png' || fileExtension === 'jpg' || fileExtension === 'jpeg' || fileExtension === 'png';
+
+        if (!isSupportedType) {
+            this.messageService.showError('This file type is not supported. Please upload a JPG or PNG image.');
             return;
         }
 
         const photoUuid = this.randomGeneratorService.generateString(16);
         const uploadPhoto = new UploadPhoto(photoUuid);
-        uploadPhoto.photoFile = event.target.files[0];
+        uploadPhoto.photoFile = file;
 
-        this.setPhotoData(uploadPhoto);
-        this.setExifMetadata(uploadPhoto, async () => {
+        if (file.size > this.maxFileSize) {
+            if (this.deviceDetectorService.deviceType() !== DeviceType.Mobile) {
+                this.messageService.showError(`Uploaded file is too large. Maximum size is ${this.maxFileSizeString()}.`);
+                return;
+            }
+
             try {
-                this.photos.update(photos => [...photos, uploadPhoto]);
-
-                const formData = new FormData();
-
-                if (uploadPhoto.photoFile) {
-                    formData.append('file', uploadPhoto.photoFile);
-                }
-
-                const temporaryAttachment = await this.attachmentsService.uploadAttachment(formData);
-                this.photos.update(photosArray => {
-                    const photo = photosArray.find(item => item.uuid === uploadPhoto.uuid);
-                    if (photo) {
-                        photo.id = temporaryAttachment.id;
-                        photo.isUploaded.set(true);
-                    }
-
-                    return [...photosArray];
-                });
+                uploadPhoto.photoResizedFile = await this.resizeImageToJpeg(file);
             } catch (error) {
                 console.error(error);
-                this.messageService.showServerError(error);
+                this.messageService.showError('Unable to resize image before upload.');
+                return;
             }
-        });
+
+            if (uploadPhoto.photoResizedFile.size > this.maxFileSize) {
+                this.messageService.showError(`Uploaded file is too large. Maximum size is ${this.maxFileSizeString()}.`);
+                return;
+            }
+        }
+
+        this.setPhotoData(uploadPhoto);
+        this.readExifMetadataAndUpload(uploadPhoto);
     }
 
     protected onImageClick(index: number): void {
@@ -204,6 +212,19 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         } finally {
             this.hashtagsInProgress.set(false);
         }
+    }
+
+    protected onPhotoUploadCancel(photo: UploadPhoto): void {
+        if (!photo.isUploading() || photo.isUploaded()) {
+            return;
+        }
+
+        photo.uploadSubscription?.unsubscribe();
+        photo.uploadSubscription = undefined;
+
+        photo.isUploading.set(false);
+        photo.uploadProgress.set(0);
+        this.photos.update(photos => photos.filter(x => x !== photo));
     }
 
     protected onInsertTemplate(): void {
@@ -423,10 +444,79 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         }
     }
 
-    private setExifMetadata(uploadPhoto: UploadPhoto, listener: () => void): void {
+    private uploadPhoto(uploadPhoto: UploadPhoto): void {
+        try {
+            this.photos.update(photos => [...photos, uploadPhoto]);
+
+            const formData = new FormData();
+            const fileToUpload = uploadPhoto.photoResizedFile ?? uploadPhoto.photoFile;
+
+            if (fileToUpload) {
+                formData.append('file', fileToUpload);
+            }
+
+            // Reset file form (in case if we want to send the same file once again).
+            setTimeout(() => {
+                this.resetPhotoFileUpload();
+            });
+
+            uploadPhoto.isUploading.set(true);
+            uploadPhoto.uploadProgress.set(0);
+            uploadPhoto.uploadSubscription = this.attachmentsService.uploadAttachmentWithProgress(formData).subscribe({
+                next: (event) => {
+                    // Upload progress is working only when we delete withFetch() from HttpClient configuration.
+                    // However, it's strongly recommended to enable fetch for applications that use Server-Side
+                    // Rendering for better performance and compatibility (https://angular.dev/api/common/http/provideHttpClient).
+                    if (event.type === HttpEventType.UploadProgress) {
+                        const total = event.total ?? fileToUpload?.size ?? 0;
+                        if (total > 0) {
+                            uploadPhoto.uploadProgress.set(Math.round((event.loaded / total) * 100));
+                        }
+                    }
+
+                    if (event.type === HttpEventType.Response) {
+                        const temporaryAttachment = event.body;
+                        if (!temporaryAttachment) {
+                            return;
+                        }
+
+                        this.photos.update(photosArray => {
+                            const photo = photosArray.find(item => item.uuid === uploadPhoto.uuid);
+                            if (photo) {
+                                photo.id = temporaryAttachment.id;
+                                photo.isUploaded.set(true);
+                                photo.isUploading.set(false);
+                                photo.uploadProgress.set(100);
+                            }
+
+                            return [...photosArray];
+                        });
+
+                        uploadPhoto.uploadSubscription?.unsubscribe();
+                        uploadPhoto.uploadSubscription = undefined;
+                    }
+                },
+                error: (error) => {
+                    console.error(error);
+                    this.messageService.showServerError(error);
+                    uploadPhoto.isUploading.set(false);
+                    uploadPhoto.uploadProgress.set(0);
+
+                    uploadPhoto.uploadSubscription?.unsubscribe();
+                    uploadPhoto.uploadSubscription = undefined;
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            this.messageService.showServerError(error);
+        }
+    }
+
+    private readExifMetadataAndUpload(uploadPhoto: UploadPhoto): void {
         const bufferReader = new FileReader();
 
         bufferReader.addEventListener('load', () => {
+            // First we can read exif metadata from the file.
             const tags = ExifReader.load(bufferReader.result as ArrayBuffer);
 
             const caption = tags['Caption/Abstract']?.description.toString();
@@ -454,15 +544,41 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
             const model = tags['Model']?.description.toString();
             if (model) {
-              if (make) {
-                const strippedModel = this.stripModel(model, make);
-                uploadPhoto.model = strippedModel;
-              } else {
-                uploadPhoto.model = model;
-              }
+                if (make) {
+                    const strippedModel = this.stripModel(model, make);
+                    uploadPhoto.model = strippedModel;
+                } else {
+                    uploadPhoto.model = model;
+                }
+
                 uploadPhoto.showModel = true;
             }
 
+            // First we can try to extract lens information from 'LensModel' and 'LensMake' tags.
+            const lensModel = tags['LensModel']?.description.toString().trim();
+            if (lensModel) {
+                uploadPhoto.lens = lensModel.trim();
+
+                const lensMake = tags['LensMake']?.description.toString().trim();
+                if (lensMake && !lensModel.startsWith(lensMake)) {
+                    uploadPhoto.lens = `${lensMake} ${lensModel}`.trim();
+                }
+
+                uploadPhoto.showLens = true;
+            }
+
+            // Than we try to extract lens from 'LensType' tag (Canon proprietary, non-standard tag).
+            const lensTypeValue = tags['LensType']?.value;
+            if (lensTypeValue) {
+                const lensName = this.canonExifService.extractLensModel(lensTypeValue);
+                if (lensName) {
+                    uploadPhoto.lens = lensName;
+                    uploadPhoto.showLens = true;
+                }
+            }
+
+            // If we have exif 'LensModel' tag it's more important then 'LensModel' tag and 'LensType'
+            // tag from additional exif (and should override it).
             const lens = tags['Lens']?.description.toString();
             if (lens) {
                 uploadPhoto.lens = lens;
@@ -501,8 +617,9 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
             const createDate = tags['CreateDate']?.description.toString();
             const dateCreated = tags['DateCreated']?.description.toString();
-            const dateTimeCreated = tags['Date Created']?.description.toString().replace(':', '-').trim();
+            const dateTimeCreated = tags['Date Created']?.description.toString().replaceAll(':', '-').trim();
             const timeCreated = tags['Time Created']?.description.toString();
+            const dateTimeOrginal = tags['DateTimeOriginal']?.description.toString();
 
             if (createDate) {
                 uploadPhoto.createDate = new Date(createDate);
@@ -513,6 +630,15 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             } else if (dateTimeCreated && timeCreated) {
                 uploadPhoto.createDate = new Date(dateTimeCreated + 'T' + timeCreated);
                 uploadPhoto.showCreateDate = true;
+            } else if (dateTimeOrginal) {
+                const dateTimeParts = dateTimeOrginal.split(' ');
+                if (dateTimeParts.length === 2) {
+                    const datePart = dateTimeParts[0].replaceAll(':', '-').trim();
+                    const timePart = dateTimeParts[1].trim();
+
+                    uploadPhoto.createDate = new Date(datePart + 'T' + timePart);
+                    uploadPhoto.showCreateDate = true;
+                }
             }
 
             const software = tags['Software']?.description.toString() ?? tags['CreatorTool']?.description.toString();
@@ -533,7 +659,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             const gpsLatitudeRef = tags['GPSLatitudeRef']?.value?.toString().toUpperCase();
             const gpsLongitudeRef = tags['GPSLongitudeRef']?.value?.toString().toUpperCase();
 
-            if (gpsLatitude && gpsLongitude) {
+            if (gpsLatitude && gpsLongitude && gpsLatitude !== 'NaN' && gpsLongitude !== 'NaN') {
                 if (gpsLatitudeRef === 'S' && !gpsLatitude.startsWith('-')) {
                     gpsLatitude = '-' + gpsLatitude;
                 }
@@ -547,7 +673,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 uploadPhoto.showGpsCoordination = false;
             }
 
-            listener();
+            // After reading exif metadata from file, we can upload file to the server.
+            this.uploadPhoto(uploadPhoto);
         });
 
         if (uploadPhoto.photoFile) {
@@ -671,11 +798,61 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     }
 
     private stripModel(model: string, manufacturer: string): string {
+        if (manufacturer && model.startsWith(manufacturer)) {
+            model = model.replace(manufacturer, '').trim();
+        }
 
-      if (manufacturer && model.startsWith(manufacturer)) {
-          model = model.replace(manufacturer, '').trim();
-      }
-      return model;
+        return model;
     }
 
+    private async resizeImageToJpeg(sourceFile: Blob): Promise<Blob> {
+        const objectUrl = URL.createObjectURL(sourceFile);
+
+        try {
+            const image = await this.loadImage(objectUrl) as HTMLImageElement;
+            const sourceWidth = image.naturalWidth || image.width;
+            const sourceHeight = image.naturalHeight || image.height;
+
+            if (!sourceWidth || !sourceHeight) {
+                throw new Error('Invalid image size.');
+            }
+
+            const scale = Math.min(1, this.imageResizeLongerEdge / Math.max(sourceWidth, sourceHeight));
+            const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
+            const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                throw new Error('Unable to create canvas context.');
+            }
+
+            context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+            const resizedBlob = await new Promise<Blob>((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        resolve(blob);
+                        return;
+                    }
+
+                    reject(new Error('Unable to create JPEG blob.'));
+                }, 'image/jpeg', this.imageResizeJpegQuality);
+            });
+
+            return resizedBlob;
+        } finally {
+            URL.revokeObjectURL(objectUrl);
+        }
+    }
+
+    private resetPhotoFileUpload(): void {
+        const internalPhotoFileUpload = this.photoFileUpload();
+        if (internalPhotoFileUpload) {
+            internalPhotoFileUpload.nativeElement.value = '';
+        }
+    }
 }

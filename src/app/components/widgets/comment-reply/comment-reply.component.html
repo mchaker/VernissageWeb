@@ -13,6 +13,7 @@
                     placeholder="Leave a comment"
                     #commentInput="ngModel"
                     [(ngModel)]="comment"
+                    [disabled]="disabled()"
                     aria-label="Leave a comment"
                     [appMaxLength]="maxStatusLength().toString()">
                 </textarea>
@@ -39,6 +40,6 @@
             </mat-form-field>
 
         </div>
-        <button type="submit" mat-flat-button color="primary" [disabled]="isDuringSave() || !commentEntered()">Send</button>
+        <button type="submit" matButton="filled" [disabled]="isDuringSave() || !commentEntered()">Send</button>
     </div>
 </form>

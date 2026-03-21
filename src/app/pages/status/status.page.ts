@@ -34,6 +34,8 @@ import { LoadingService } from 'src/app/services/common/loading.service';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { FocusTrackerService } from 'src/app/services/common/focus-tracker.service';
 import { PageNotFoundError } from 'src/app/errors/page-not-found-error';
+import { StatusVisibility } from 'src/app/models/status-visibility';
+import { Attachment } from 'src/app/models/attachment';
 
 @Component({
     selector: 'app-status',
@@ -91,10 +93,12 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private routeParamsSubscription?: Subscription;
     private routeNavigationEndSubscription?: Subscription;
     private readonly oneSecond = 1000;
+    private readonly maxImagesInComments = 4;
     private firstCanvasInitialization = false;
     private urlToGallery?: string;
     private popupGalleryId = 'popupGalleryId';
     private mainGalleryId = 'mainGalleryId';
+    private commentGalleryId = 'commentGalleryId';
     private blurhash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
 
     private document = inject(DOCUMENT);
@@ -671,6 +675,67 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         return withoutMillimeters.split(/\.|,/)[0];
     }
 
+    protected getCorrectIsoDate(stringDate?: string): Date | undefined {
+        if (!stringDate || stringDate.length === 0) {
+            return undefined;
+        }
+
+        // 2025-02-15T15:12:41.706Z (regular ISO date).
+        const dateIso = Date.parse(stringDate);
+        if (dateIso && isNaN(dateIso) === false) {
+            return new Date(dateIso);
+        }
+
+        // 2025:12:18 12:20:02 (we should avoid storing that kind of date format into the database).
+        const dateSpecific = this.parseSpecificDateString(stringDate);
+        if (dateSpecific) {
+            return dateSpecific
+        }
+
+        return undefined;
+    }
+
+    protected commentHasImages(statusComment: StatusComment): boolean {
+        if (!statusComment.status.attachments) {
+            return false;
+        }
+
+        if (statusComment.status.attachments.length === 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected commentImagesToDisplay(statusComment: StatusComment): Attachment[] {
+        if (statusComment.status.attachments && statusComment.status.attachments.length > 0) {
+            return statusComment.status.attachments.slice(0, this.maxImagesInComments);
+        }
+
+        return [];
+    }
+
+    protected getCommentAttachmentUrl(attachment: Attachment): string | undefined {
+        return attachment.smallFile?.url
+    }
+
+    protected getCommentAttachmentAlt(attachment: Attachment): string | undefined {
+        return attachment.description;
+    }
+
+    protected openCommentImagesInFullScreen(statusComment: StatusComment): void {
+        const internalImages = statusComment.status?.attachments?.map(attachment => {
+            return new ImageItem({ src: attachment.originalFile?.url, thumb: attachment.smallFile?.url });
+        });
+
+        const commentGallery = this.gallery.ref(this.commentGalleryId);
+        commentGallery.load(internalImages ?? []);
+
+        this.lightbox.open(this.currentIndex(), this.commentGalleryId, {
+            panelClass: 'fullscreen'
+        });
+    }
+
     private getAltStatus(index: number): string | undefined {
         const attachment = this.mainStatus()?.attachments?.at(index);
         if (attachment) {
@@ -920,15 +985,16 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     }
 
     private drawCanvas(): void {
-        if (!this.isBrowser) {
+        if (!this.isBrowser()) {
             return;
         }
 
-        if (!this.canvas) {
+        const internalCanvas = this.canvas();
+        if (!internalCanvas) {
             return;
         }
 
-        const ctx = this.canvas()?.nativeElement.getContext('2d');
+        const ctx = internalCanvas.nativeElement.getContext('2d');
         if (!ctx) {
             return;
         }
@@ -991,7 +1057,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     }
 
     private browserSupportsHdr(): boolean {
-        return this.deviceDetectorService.browser === "Chrome" && this.deviceDetectorService.isDesktop();
+        return this.deviceDetectorService.browser() === "Chrome" && this.deviceDetectorService.isDesktop();
     }
 
     private htmlToText(value: string): string {
@@ -1005,7 +1071,15 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     }
 
     private setNoIndexMeta(): void {
-        this.metaService.updateTag({ name: 'robots', content: 'noindex, noarchive' });
+        const isLocal = this.mainStatus()?.isLocal ?? false;
+        const isPublic = this.mainStatus()?.visibility === StatusVisibility.Public;
+        const includePublicPostsInSearchEngines = this.mainStatus()?.user?.includePublicPostsInSearchEngines ?? false;
+
+        if (isLocal && isPublic && includePublicPostsInSearchEngines) {
+            this.metaService.removeTag('name="robots"');
+        } else {
+            this.metaService.updateTag({ name: 'robots', content: 'noindex, noarchive' });
+        }
     }
 
     private clearNoIndexMeta(): void {
@@ -1035,6 +1109,34 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         const internalAttachments = this.mainStatus()?.attachments;
         if (internalAttachments && internalAttachments.length > 0) {
             return internalAttachments[0].originalFile?.url;
+        }
+
+        return undefined;
+    }
+
+    private parseSpecificDateString(stringDate: string): Date | undefined {
+        const exifDateRegex = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
+        const exifDateMatch = stringDate.match(exifDateRegex);
+
+        if (exifDateMatch) {
+            const year = Number.parseInt(exifDateMatch[1], 10);
+            const month = Number.parseInt(exifDateMatch[2], 10);
+            const day = Number.parseInt(exifDateMatch[3], 10);
+            const hours = Number.parseInt(exifDateMatch[4], 10);
+            const minutes = Number.parseInt(exifDateMatch[5], 10);
+            const seconds = Number.parseInt(exifDateMatch[6], 10);
+
+            const parsedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+            if (
+                parsedDate.getFullYear() === year &&
+                parsedDate.getMonth() === month - 1 &&
+                parsedDate.getDate() === day &&
+                parsedDate.getHours() === hours &&
+                parsedDate.getMinutes() === minutes &&
+                parsedDate.getSeconds() === seconds
+            ) {
+                return parsedDate;
+            }
         }
 
         return undefined;
