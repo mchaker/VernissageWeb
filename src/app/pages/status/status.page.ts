@@ -1141,4 +1141,23 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
         return undefined;
     }
+
+    // Written partly by Ashtaka and mostly by Gemini 3.1 Pro
+    formatIfJson(text?: string | null): string {
+        if (!text) return '';
+        const trimmedText = text.trim();
+
+        // Check if the field starts with `{` and ends with `}`
+        if (trimmedText.startsWith('{') && trimmedText.endsWith('}')) {
+          try {
+            const parsedJson = JSON.parse(trimmedText);
+            // Treat like JSON and format it with a 2-space indent
+            return JSON.stringify(parsedJson, null, 2);
+          } catch {
+            // Silently fails and falls back to raw text if it wasn't perfectly valid JSON
+          }
+        }
+
+        return text;
+      }
 }

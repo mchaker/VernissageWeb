@@ -301,38 +301,30 @@
                             @if (exif(); as exifInternal) {
                                 <div class="exif">
 
-                                    <!-- swarm/auto, invoke, novelai-->
+                                    <!-- swarm and a1111 metadata field -->
                                     @if (exifInternal.parameters) {
-                                        <div class="margin-bottom-10">
-                                          <mat-icon
-                                            class="margin-right-20"
-                                            inline="true"
-                                            matTooltip="Parameters"
-                                            >settings_applications</mat-icon
-                                          >
-                                          <span class="exif-label">
-                                            <span *ngIf="exifInternal.parameters"
-                                              >{{ exifInternal.parameters }}</span
-                                            >
-                                          </span>
-                                        </div>
+                                    <div class="margin-bottom-10">
+                                      <mat-icon class="margin-right-20" inline="true" matTooltip="Parameters">settings_applications</mat-icon>
+                                      <span class="exif-label" style="display: inline-block; width: calc(100% - 45px); vertical-align: top;">
+                                        <details>
+                                          <summary style="cursor: pointer; opacity: 0.8; user-select: none; outline: none; font-weight: 500;">Show parameters</summary>
+                                          <pre style="margin-top: 10px; padding: 10px; border-radius: 6px; background-color: var(--mat-app-background-color, rgba(128, 128, 128, 0.1)); white-space: pre-wrap; word-break: break-word; font-family: monospace; font-size: 0.85em; overflow-x: auto; line-height: 1.4;">{{ formatIfJson(exifInternal.parameters) }}</pre>
+                                        </details>
+                                      </span>
+                                    </div>
                                     }
 
-                                    <!-- comfy -->
+                                    <!-- comfy workflow field -->
                                     @if (exifInternal.workflow) {
-                                        <div class="margin-bottom-10">
-                                          <mat-icon
-                                            class="margin-right-20"
-                                            inline="true"
-                                            matTooltip="Workflow"
-                                            >settings_applications</mat-icon
-                                          >
-                                          <span class="exif-label">
-                                            <span *ngIf="exifInternal.workflow"
-                                              >{{ exifInternal.workflow }}</span
-                                            >
-                                          </span>
-                                        </div>
+                                    <div class="margin-bottom-10">
+                                      <mat-icon class="margin-right-20" inline="true" matTooltip="Workflow">settings_applications</mat-icon>
+                                      <span class="exif-label" style="display: inline-block; width: calc(100% - 45px); vertical-align: top;">
+                                        <details>
+                                          <summary style="cursor: pointer; opacity: 0.8; user-select: none; outline: none; font-weight: 500;">Show workflow</summary>
+                                          <pre style="margin-top: 10px; padding: 10px; border-radius: 6px; background-color: var(--mat-app-background-color, rgba(128, 128, 128, 0.1)); white-space: pre-wrap; word-break: break-word; font-family: monospace; font-size: 0.85em; overflow-x: auto; line-height: 1.4;">{{ formatIfJson(exifInternal.workflow) }}</pre>
+                                        </details>
+                                      </span>
+                                    </div>
                                     }
 
                                     @if (exifInternal.make || exifInternal.model) {
@@ -342,7 +334,7 @@
                                                 @if (exifInternal.make) {
                                                     <span>{{ exifInternal.make }}</span>&nbsp;
                                                 }
-                                                
+
                                                 @if (exifInternal.model) {
                                                     <span>{{ exifInternal.model }}</span>
                                                 }
