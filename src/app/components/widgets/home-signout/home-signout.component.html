@@ -10,10 +10,10 @@
         }
 
         <div style="max-width: 960px; margin-left: auto; margin-right: auto;">
-            <div class="header">Rediscover the beauty of photography</div>
+            <div class="header">Share or discover ai art</div>
             <div class="subheader text-muted">
-                <p>Vernissage is a free platform designed for photographers.</p>
-                <p>It's ad-free and focused on community and creativity, not algorithms.</p>
+                <p>Fartgram is a free platform designed for proompters.</p>
+                <p>It's ad-free and has no algorithms, you make your own feed.</p>
             </div>
 
             <div class="flex-row flex-wrap flex-center gap-8 margin-top-20 margin-bottom-20 margin-left-10 margin-right-10">
@@ -33,8 +33,9 @@
                 <li class="margin-bottom-10"><a [routerLink]="['/support']">Support</a></li>
                 <li class="margin-bottom-10"><a [routerLink]="['/terms']">Terms of Service</a></li>
                 <li class="margin-bottom-10"><a [routerLink]="['/privacy']">Privacy policy</a></li>
-                <li class="margin-bottom-10"><a href="https://github.com/VernissageApp/VernissageServer" target="_blank">Source code</a></li>
-                <li class="margin-bottom-10"><a href="https://api.vernissage.photos/" target="_blank">API documentation</a></li>
+                <li class="margin-bottom-10"><a href="https://github.com/mchaker/VernissageServer/tree/fartgram-clean" target="_blank">Server source code</a></li>
+                <li class="margin-bottom-10"><a href="https://github.com/mchaker/VernissageWeb/tree/fartgram-clean" target="_blank">Website source code</a></li>
+                <li class="margin-bottom-10"><a href="https://api.vernissage.photos/" target="_blank">Vernissage API docs</a></li>
 
                 @if (mastodonUrl(); as mastodonUrlString) {
                     <li class="margin-bottom-10"><a [href]="mastodonUrlString" target="_blank">Mastodon</a></li>
@@ -43,7 +44,7 @@
 
             @if (showEditorsChoice() && statuses()?.data?.length) {
                 <div class="text-center">
-                    <h1>Editor's choice across whole Fartgram</h1>
+                    <h1>Editor's (admin) choice across Fartgram</h1>
                 </div>
             }
         </div>
