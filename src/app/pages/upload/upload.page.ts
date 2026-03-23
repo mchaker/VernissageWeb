@@ -33,6 +33,8 @@ import { ForbiddenError } from 'src/app/errors/forbidden-error';
 import { CanonExifService } from 'src/app/services/common/canon-exif.service';
 import { DeviceDetectorService, DeviceType } from 'ngx-device-detector';
 
+import { HostListener } from '@angular/core';
+
 @Component({
     selector: 'app-upload',
     templateUrl: './upload.page.html',
@@ -854,5 +856,11 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         if (internalPhotoFileUpload) {
             internalPhotoFileUpload.nativeElement.value = '';
         }
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    onBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = ''; // This tells the browser to trigger its native warning prompt
     }
 }
