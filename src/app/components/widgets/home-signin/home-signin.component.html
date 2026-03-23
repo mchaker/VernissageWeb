@@ -23,13 +23,13 @@
                 @if (!isHandset()) {
                     @switch (timeline()) {
                         @case ('private') {
-                            <div class="fs-60 text-muted">Your personal collection of photos, created based on posts from users you follow.</div>
+                            <div class="fs-60 text-muted">Your personal collection of images, created based on posts from users you follow.</div>
                         }
                         @case ('local') {
-                            <div class="fs-60 text-muted">A collection of photos created from all posts made by users publishing on this server.</div>
+                            <div class="fs-60 text-muted">A collection of images created from all posts made by users publishing on this server.</div>
                         }
                         @case ('global') {
-                            <div class="fs-60 text-muted">A collection of photos created from all user-uploaded images that have reached this server.</div>
+                            <div class="fs-60 text-muted">A collection of images created from all user-uploaded images that have reached this server.</div>
                         }
                     }
                 }
