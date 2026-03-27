@@ -726,6 +726,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
                 const internalExif = attachment.metadata?.exif;
                 if (internalExif) {
+                    uploadPhoto.parameters = internalExif.parameters;
+                    uploadPhoto.workflow = internalExif.workflow;
                     uploadPhoto.make = internalExif.make;
                     uploadPhoto.model = internalExif.model;
                     uploadPhoto.lens = internalExif.lens;
@@ -747,6 +749,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                     }
                 }
 
+                uploadPhoto.showParameters = !!uploadPhoto.parameters;
+                uploadPhoto.showWorkflow = !!uploadPhoto.workflow;
                 uploadPhoto.showMake = !!uploadPhoto.make;
                 uploadPhoto.showModel = !!uploadPhoto.model;
                 uploadPhoto.showLens = !!uploadPhoto.lens;
