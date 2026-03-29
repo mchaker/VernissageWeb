@@ -283,11 +283,11 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 temporaryAttachment.blurhash = photo.blurhash;
 
                 if (photo.showParameters) {
-                  temporaryAttachment.parameters = photo.parameters;
+                    temporaryAttachment.parameters = photo.parameters;
                 }
 
                 if (photo.showWorkflow) {
-                  temporaryAttachment.workflow = photo.workflow;
+                    temporaryAttachment.workflow = photo.workflow;
                 }
 
                 if (photo.showMake) {
