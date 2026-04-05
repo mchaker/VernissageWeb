@@ -280,6 +280,14 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 temporaryAttachment.description = photo.description;
                 temporaryAttachment.blurhash = photo.blurhash;
 
+                if (photo.showParameters) {
+                    temporaryAttachment.parameters = photo.parameters;
+                }
+
+                if (photo.showWorkflow) {
+                    temporaryAttachment.workflow = photo.workflow;
+                }
+
                 if (photo.showMake) {
                     temporaryAttachment.make = photo.make;
                 }
@@ -516,6 +524,18 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 uploadPhoto.description = caption.trim();
             }
 
+            const parameters = tags["parameters"]?.description.toString();
+            if (parameters) {
+              uploadPhoto.parameters = parameters;
+              uploadPhoto.showParameters = true;
+            }
+
+            const workflow = tags["workflow"]?.description.toString();
+            if (workflow) {
+              uploadPhoto.workflow = workflow;
+              uploadPhoto.showWorkflow = true;
+            }
+
             const make = tags['Make']?.description.toString();
             if (make) {
                 uploadPhoto.make = make;
@@ -704,6 +724,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
                 const internalExif = attachment.metadata?.exif;
                 if (internalExif) {
+                    uploadPhoto.parameters = internalExif.parameters;
+                    uploadPhoto.workflow = internalExif.workflow;
                     uploadPhoto.make = internalExif.make;
                     uploadPhoto.model = internalExif.model;
                     uploadPhoto.lens = internalExif.lens;
@@ -725,6 +747,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                     }
                 }
 
+                uploadPhoto.showParameters = !!uploadPhoto.parameters;
+                uploadPhoto.showWorkflow = !!uploadPhoto.workflow;
                 uploadPhoto.showMake = !!uploadPhoto.make;
                 uploadPhoto.showModel = !!uploadPhoto.model;
                 uploadPhoto.showLens = !!uploadPhoto.lens;
