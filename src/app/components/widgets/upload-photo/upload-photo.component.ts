@@ -29,28 +29,28 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
     public licenses = input.required<License[]>();
     public cancelUpload = output<UploadPhoto>();
 
-    protected cities$?: Observable<Location[]>;
-    protected citiesControl = new FormControl<string | Location>('');
-    protected filteredCountries$?: Observable<Country[]>;
-    protected countriesControl = new FormControl<string | Country>('');    
+    //protected cities$?: Observable<Location[]>;
+    //protected citiesControl = new FormControl<string | Location>('');
+    //protected filteredCountries$?: Observable<Country[]>;
+    //protected countriesControl = new FormControl<string | Country>('');
     protected isOpenAIEnabled = signal(false);
     protected describeInProgress = signal(false);
-    protected currentCountry = signal<Country | undefined>(undefined);
-    protected currentCity = signal<Location | undefined>(undefined);
+    //protected currentCountry = signal<Country | undefined>(undefined);
+    //protected currentCity = signal<Location | undefined>(undefined);
     protected hdrFileSizeString = signal('');
     protected maxFileSizeString = signal('');
 
     private readonly defaultMaxHdrFileSize = 4194304;
     private readonly defaultMaxFileSize = 10485760;
-    private readonly defaultCountryCacheKey = 'default-country';
-    private readonly defaultLocationCacheKey = 'default-location';
+    //private readonly defaultCountryCacheKey = 'default-country';
+    //private readonly defaultLocationCacheKey = 'default-location';
     private readonly defaultLicenseCacheKey = 'default-license';
 
-    private allCountries: Country[] = [];
+    //private allCountries: Country[] = [];
     private initialized = false;
 
-    private countriesService = inject(CountriesService);
-    private locationService = inject(LocationsService);
+    //private countriesService = inject(CountriesService);
+    //private locationService = inject(LocationsService);
     private attachmentsService = inject(AttachmentsService);
     private messageService = inject(MessagesService);
     private settingsService = inject(SettingsService);
@@ -62,13 +62,13 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
         super.ngOnInit();
 
         this.isOpenAIEnabled.set(this.settingsService.publicSettings?.isOpenAIEnabled ?? false);
-        this.allCountries = await this.countriesService.all();
+        //this.allCountries = await this.countriesService.all();
         this.hdrFileSizeString.set(this.fileSizeService.getHumanFileSize(this.defaultMaxHdrFileSize, 0));
 
         const maxFileSize = this.instanceService.instance?.configuration?.attachments?.imageSizeLimit ?? this.defaultMaxFileSize;
         this.maxFileSizeString.set(this.fileSizeService.getHumanFileSize(maxFileSize, 0));
 
-        this.filteredCountries$ = this.countriesControl.valueChanges.pipe(
+        /*this.filteredCountries$ = this.countriesControl.valueChanges.pipe(
             startWith(''),
             map(value => {
                 const name = typeof value === 'string' ? value : value?.name;
@@ -96,15 +96,15 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
                 const query = typeof value === 'string' ? value : value?.name;
                 return this.locationService.search(this.currentCountry()?.code ?? "GB", query)
             })
-        );
+        );*/
 
         if (!this.photo().id) {
-            this.restoreCountryFromCache();
-            this.restoreCityFromCache();
+            //this.restoreCountryFromCache();
+            //this.restoreCityFromCache();
             this.restoreLicenseFromCache();
         }
 
-        const location = this.photo().location;
+        /*const location = this.photo().location;
         if (location) {
             const country = this.photo().location?.country;
             if (country) {
@@ -114,10 +114,10 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
 
             this.currentCity.set(location);
             this.citiesControl.setValue(location);
-        }
+        }*/
     }
 
-    protected displayCountryFn(country: Country): string {
+    /*protected displayCountryFn(country: Country): string {
         return country && country.name ? country.name : '';
     }
 
@@ -157,7 +157,7 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
             photo.locationId = this.currentCity()?.id;
             return photo;
         });
-    }
+    }*/
 
     protected onLicenseChange(): void {
         this.storeLicenseInCache(this.photo().licenseId);
@@ -243,10 +243,10 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
         }
     }
 
-    private filterCountry(value: string): Country[] {
+    /*private filterCountry(value: string): Country[] {
         const filterValue = value.toLowerCase();
         return this.allCountries.filter(option => option.name?.toLowerCase().includes(filterValue));
-    }
+    }*/
 
     private setPhotoData(): void {
         const photoHdrFile = this.photo().photoHdrFile
@@ -260,13 +260,13 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
                 photo.photoHdrSrc = reader.result as string;
                 return photo;
             });
-            
+
         }
 
         reader.readAsDataURL(photoHdrFile);
     }
 
-    private storeCountryInCache(country?: Country): void {
+    /*private storeCountryInCache(country?: Country): void {
         if (country) {
             this.persistenceService.setJson(this.defaultCountryCacheKey, country);
         } else {
@@ -280,7 +280,7 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
         } else {
             this.persistenceService.remove(this.defaultLocationCacheKey);
         }
-    }
+    }*/
 
     private storeLicenseInCache(licenseId?: string): void {
         if (licenseId) {
@@ -290,7 +290,7 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
         }
     }
 
-    private restoreCountryFromCache(): void {
+    /*private restoreCountryFromCache(): void {
         const persistedCountry = this.persistenceService.getJson(this.defaultCountryCacheKey) as Country;
         if (persistedCountry) {
             const foundedCountry = this.allCountries.find(x => x.id === persistedCountry.id);
@@ -312,7 +312,7 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
                 return photo;
             });
         }
-    }
+    }*/
 
     private restoreLicenseFromCache(): void {
         const persistedLicense = this.persistenceService.get(this.defaultLicenseCacheKey);

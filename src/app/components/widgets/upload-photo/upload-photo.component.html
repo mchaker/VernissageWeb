@@ -69,7 +69,7 @@
         </mat-select>
     </mat-form-field>
 
-    <div class="text-muted">Location</div>
+    <!--<div class="text-muted">Location</div>
     <mat-form-field appearance="outline" class="margin-top-10">
         <mat-label>Country</mat-label>
         <input type="text"
@@ -114,7 +114,7 @@
                 <mat-icon>close</mat-icon>
             </button>
         }
-    </mat-form-field>
+    </mat-form-field>//-->
 
     <div class="margin-bottom-10 margin-top-20">
         <mat-divider></mat-divider>
@@ -123,7 +123,7 @@
     <div class="text-muted">Exif metadata</div>
     <div class="exif-values">
 
-        <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
+        <!--<div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'gpsCoordination' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showGpsCoordination">
                 <span class="text-muted">GPS coordinates:</span>
             </mat-checkbox>
@@ -140,7 +140,7 @@
         <div class="margin-bottom-20 margin-left-10 width-100 text-muted fs-90">
             <strong>Warning:</strong> By sharing the geolocation data of your photo, you are disclosing the exact location where the photo was taken.
             Please ensure you are comfortable with this information being publicly available before proceeding.
-        </div>
+        </div>//-->
 
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'parameters' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showParameters">
@@ -159,7 +159,7 @@
                 <input type="text" matInput [name]="'inputWorkflow' + internalIndex" [(ngModel)]="photo().workflow" [disabled]="!photo().showWorkflow" aria-label="Workflow" />
             </mat-form-field>
         </div>
-
+        <!--
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'make' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showMake">
                 <span class="text-muted">Manufacturer:</span>
@@ -242,7 +242,7 @@
             <mat-form-field appearance="outline" class="flex-grow-2">
                 <input type="text" matInput [name]="'inputFlash' + internalIndex" [(ngModel)]="photo().flash" [disabled]="!photo().showFlash" aria-label="Flash" />
             </mat-form-field>
-        </div>
+        </div>//-->
 
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'software' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showSoftware">
@@ -252,7 +252,7 @@
                 <input type="text" matInput [name]="'inputSoftware' + internalIndex" [(ngModel)]="photo().software" [disabled]="!photo().showSoftware" aria-label="Software" />
             </mat-form-field>
         </div>
-
+        <!--
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'film' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showFilm">
                 <span class="text-muted">Film:</span>
@@ -278,7 +278,7 @@
             <mat-form-field appearance="outline" class="flex-grow-2">
                 <input type="text" matInput [name]="'inputScanner' + internalIndex" [(ngModel)]="photo().scanner" [disabled]="!photo().showScanner" aria-label="Scanner" />
             </mat-form-field>
-        </div>
+        </div>//-->
 
         <div class="flex-row flex-responsive flex-stretch gap-16 small-text-input margin-bottom-10">
             <mat-checkbox class="exif-label" [name]="'createDate' + internalIndex" [disableRipple]="true" [(ngModel)]="photo().showCreateDate">

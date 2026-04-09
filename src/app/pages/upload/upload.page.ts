@@ -289,7 +289,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 if (photo.showWorkflow) {
                     temporaryAttachment.workflow = photo.workflow;
                 }
-
+                /*
                 if (photo.showMake) {
                     temporaryAttachment.make = photo.make;
                 }
@@ -301,11 +301,11 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 if (photo.showLens) {
                     temporaryAttachment.lens = photo.lens;
                 }
-
+                */
                 if (photo.showCreateDate && photo.createDate) {
                     temporaryAttachment.createDate = this.getDateTime(photo.createDate);
                 }
-
+                /*
                 if (photo.showFocalLenIn35mmFilm) {
                     temporaryAttachment.focalLenIn35mmFilm = photo.focalLenIn35mmFilm;
                     temporaryAttachment.focalLength = photo.focalLength;
@@ -322,11 +322,11 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 if (photo.showPhotographicSensitivity) {
                     temporaryAttachment.photographicSensitivity = photo.photographicSensitivity;
                 }
-
+                */
                 if (photo.showSoftware) {
                     temporaryAttachment.software = photo.software;
                 }
-
+                /*
                 if (photo.showFilm) {
                     temporaryAttachment.film = photo.film;
                 }
@@ -347,8 +347,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 if (photo.showFlash) {
                     temporaryAttachment.flash = photo.flash
                 }
-
-                temporaryAttachment.locationId = photo.locationId;
+                */
+                //temporaryAttachment.locationId = photo.locationId;
                 temporaryAttachment.licenseId = photo.licenseId;
 
                 await this.attachmentsService.updateAttachment(temporaryAttachment);
@@ -538,6 +538,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
               uploadPhoto.showWorkflow = true;
             }
 
+            /*
             const make = tags['Make']?.description.toString();
             if (make) {
                 uploadPhoto.make = make;
@@ -615,7 +616,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             if (fNumber) {
                 uploadPhoto.fNumber = fNumber?.replace('f/', '');
                 uploadPhoto.showFNumber = true;
-            }
+            }*/
 
             const createDate = tags['CreateDate']?.description.toString();
             const dateCreated = tags['DateCreated']?.description.toString();
@@ -649,6 +650,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 uploadPhoto.showSoftware = true;
             }
 
+            /*
             const flash = tags['Flash']?.description.toString();
             if (flash) {
                 uploadPhoto.flash = flash;
@@ -673,7 +675,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 uploadPhoto.latitude = gpsLatitude;
                 uploadPhoto.longitude = gpsLongitude;
                 uploadPhoto.showGpsCoordination = false;
-            }
+                }*/
 
             // After reading exif metadata from file, we can upload file to the server.
             this.uploadPhoto(uploadPhoto);
@@ -721,29 +723,29 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                     uploadPhoto.photoHdrSrc = attachment.originalHdrFile.url;
                 }
 
-                uploadPhoto.locationId = attachment.location?.id;
-                uploadPhoto.location = attachment.location;
+                //uploadPhoto.locationId = attachment.location?.id;
+                //ploadPhoto.location = attachment.location;
                 uploadPhoto.licenseId = attachment.license?.id;
 
                 const internalExif = attachment.metadata?.exif;
                 if (internalExif) {
                     uploadPhoto.parameters = internalExif.parameters;
                     uploadPhoto.workflow = internalExif.workflow;
-                    uploadPhoto.make = internalExif.make;
-                    uploadPhoto.model = internalExif.model;
-                    uploadPhoto.lens = internalExif.lens;
-                    uploadPhoto.focalLength = internalExif.focalLength;
-                    uploadPhoto.focalLenIn35mmFilm = internalExif.focalLenIn35mmFilm;
-                    uploadPhoto.fNumber = internalExif.fNumber?.replaceAll('f/', '');
-                    uploadPhoto.exposureTime = internalExif.exposureTime;
-                    uploadPhoto.flash = internalExif.flash;
-                    uploadPhoto.photographicSensitivity = internalExif.photographicSensitivity;
+                    //uploadPhoto.make = internalExif.make;
+                    //uploadPhoto.model = internalExif.model;
+                    //uploadPhoto.lens = internalExif.lens;
+                    //uploadPhoto.focalLength = internalExif.focalLength;
+                    //uploadPhoto.focalLenIn35mmFilm = internalExif.focalLenIn35mmFilm;
+                    //uploadPhoto.fNumber = internalExif.fNumber?.replaceAll('f/', '');
+                    //uploadPhoto.exposureTime = internalExif.exposureTime;
+                    //uploadPhoto.flash = internalExif.flash;
+                    //uploadPhoto.photographicSensitivity = internalExif.photographicSensitivity;
                     uploadPhoto.software = internalExif.software;
-                    uploadPhoto.film = internalExif.film;
-                    uploadPhoto.chemistry = internalExif.chemistry;
-                    uploadPhoto.scanner = internalExif.scanner;
-                    uploadPhoto.latitude = internalExif.latitude;
-                    uploadPhoto.longitude = internalExif.longitude;
+                    //uploadPhoto.film = internalExif.film;
+                    //uploadPhoto.chemistry = internalExif.chemistry;
+                    //uploadPhoto.scanner = internalExif.scanner;
+                    //uploadPhoto.latitude = internalExif.latitude;
+                    //uploadPhoto.longitude = internalExif.longitude;
 
                     if (internalExif.createDate) {
                         uploadPhoto.createDate = new Date(internalExif.createDate);
@@ -752,20 +754,20 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
                 uploadPhoto.showParameters = !!uploadPhoto.parameters;
                 uploadPhoto.showWorkflow = !!uploadPhoto.workflow;
-                uploadPhoto.showMake = !!uploadPhoto.make;
-                uploadPhoto.showModel = !!uploadPhoto.model;
-                uploadPhoto.showLens = !!uploadPhoto.lens;
+                //uploadPhoto.showMake = !!uploadPhoto.make;
+                //uploadPhoto.showModel = !!uploadPhoto.model;
+                //uploadPhoto.showLens = !!uploadPhoto.lens;
                 uploadPhoto.showCreateDate = !!uploadPhoto.createDate;
-                uploadPhoto.showFocalLenIn35mmFilm = !!uploadPhoto.focalLenIn35mmFilm;
-                uploadPhoto.showFNumber = !!uploadPhoto.fNumber;
-                uploadPhoto.showExposureTime = !!uploadPhoto.exposureTime;
-                uploadPhoto.showPhotographicSensitivity = !!uploadPhoto.photographicSensitivity;
+                //uploadPhoto.showFocalLenIn35mmFilm = !!uploadPhoto.focalLenIn35mmFilm;
+                //uploadPhoto.showFNumber = !!uploadPhoto.fNumber;
+                //uploadPhoto.showExposureTime = !!uploadPhoto.exposureTime;
+                //uploadPhoto.showPhotographicSensitivity = !!uploadPhoto.photographicSensitivity;
                 uploadPhoto.showSoftware = !!uploadPhoto.software;
-                uploadPhoto.showFilm = !!uploadPhoto.film;
-                uploadPhoto.showChemistry = !!uploadPhoto.chemistry;
-                uploadPhoto.showScanner = !!uploadPhoto.scanner;
-                uploadPhoto.showGpsCoordination = !!uploadPhoto.latitude && !!uploadPhoto.longitude;
-                uploadPhoto.showFlash = !!uploadPhoto.flash;
+                //uploadPhoto.showFilm = !!uploadPhoto.film;
+                //uploadPhoto.showChemistry = !!uploadPhoto.chemistry;
+                //uploadPhoto.showScanner = !!uploadPhoto.scanner;
+                //uploadPhoto.showGpsCoordination = !!uploadPhoto.latitude && !!uploadPhoto.longitude;
+                //uploadPhoto.showFlash = !!uploadPhoto.flash;
 
                 uploadPhoto.isUploaded.set(true);
                 internalPhotos.push(uploadPhoto);
