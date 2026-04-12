@@ -1064,11 +1064,11 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
     private getStatusTitle(status?: Status): string {
         const author = (status?.user?.name ?? '') + ` (@${status?.user?.userName ?? ''})`;
-        const categoryName = status?.category?.name?.trim();
+        /*const categoryName = status?.category?.name?.trim();
 
         if (categoryName) {
             return `${categoryName} by ${author}`;
-        }
+        }*/
 
         const attachmentsCount = status?.attachments?.length ?? 0;
         if (attachmentsCount <= 1) {
