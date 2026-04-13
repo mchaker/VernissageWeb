@@ -36,7 +36,7 @@ export class GalleryComponent extends ResponsiveComponent implements OnInit, OnD
 
     private internalStatuses = signal<LinkableResult<Status>>(new LinkableResult<Status>());
     private isReady = false;
-    private columns = 3;
+    private columns = 4;
     private isDuringLoadingMode = false;
     
     private galleryBreakpointSubscription?: Subscription;
@@ -80,7 +80,7 @@ export class GalleryComponent extends ResponsiveComponent implements OnInit, OnD
                 this.buildGallery(this.internalStatuses());
                 this.refreshViewportObservers();
             } else {
-                this.columns = 3;
+                this.columns = 4;
                 this.avatarVisible.set(true);
                 this.buildGallery(this.internalStatuses());
                 this.refreshViewportObservers();
