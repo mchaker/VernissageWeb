@@ -185,7 +185,7 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
 
     protected onGalleryClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        if (!target.closest('.g-image-item')) {
+        if (!target.closest('gallery-item')) {
             event.preventDefault();
             event.stopPropagation();
         }
