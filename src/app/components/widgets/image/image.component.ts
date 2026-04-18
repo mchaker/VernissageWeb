@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnDestroy, OnInit, PLATFORM_ID, signal, viewChild } from '@angular/core';
+import { Gallery, ImageItem } from 'ng-gallery';
 import { decode } from 'blurhash';
 import { AvatarSize } from '../avatar/avatar-size';
 import { User } from 'src/app/models/user';
@@ -67,6 +68,11 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
     private router = inject(Router);
     private messageService = inject(MessagesService);
     private authorizationService = inject(AuthorizationService);
+    private galleryService = inject(Gallery);
+
+    protected galleryId = computed(() => `feed-gallery-${this.mainStatus()?.id ?? 'unknown'}`);
+    protected hasMultipleAttachments = computed(() => (this.mainStatus()?.attachments?.length ?? 0) > 1);
+
 
     constructor() {
             this.isBrowser = isPlatformBrowser(this.platformId);
@@ -103,6 +109,10 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showCount.set(this.preferencesService.showCounts);
 
         this.blurhash = this.getMainAttachmentBlurhash();
+
+        if (this.hasMultipleAttachments()) {
+            this.loadGallery();
+        }
 
         this.routeNavigationStartSubscription = this.router.events
             .pipe(filter(event => event instanceof NavigationStart))  
@@ -171,6 +181,21 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
             console.error(error);
             this.messageService.showServerError(error);
         }
+    }
+
+    protected onGalleryClick(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.g-image-item')) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
+    private loadGallery(): void {
+        const attachments = this.mainStatus()?.attachments ?? [];
+        const items = attachments.map(a => new ImageItem({ src: a.smallFile?.url ?? '', thumb: a.smallFile?.url ?? '' }));
+        const ref = this.galleryService.ref(this.galleryId());
+        ref.load(items);
     }
 
     protected onImageLoaded(): void {

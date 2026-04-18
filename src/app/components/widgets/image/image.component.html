@@ -2,7 +2,21 @@
 <div class="image-container">
     <canvas class="blurhash display-none" #canvas width="32" height="32"></canvas>
     
-    @if (imageSrc(); as imageSrcString) {
+    @if (hasMultipleAttachments()) {
+        <gallery
+            [id]="galleryId()"
+            class="feed-gallery"
+            (click)="onGalleryClick($event)"
+            bullets
+            bulletPosition="bottom"
+            [bulletSize]="10"
+            [counter]="false"
+            [nav]="true"
+            [loop]="true"
+            [autoHeight]="false"
+            loadingStrategy="lazy">
+        </gallery>
+    } @else if (imageSrc(); as imageSrcString) {
         @if (imageSrcString.length > 0) {
             @if (horizontal()) {
                 <img class="image-item img-horizontal" [src]="imageSrcString" loading="lazy" (load)="onImageLoaded()" [alt]="alt() ?? 'Status image'" />
@@ -34,7 +48,7 @@
         }
     }
 
-    @if (imageIsLoaded()) {
+    @if (imageIsLoaded() || hasMultipleAttachments()) {
         @if(showAvatar()) {
             @if (user(); as userObject) {
                 <div class="avatar" (mouseenter)="mouseenter.next()" (mouseleave)="mouseleave.next()">
