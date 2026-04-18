@@ -2,7 +2,7 @@
 <div class="image-container">
     <canvas class="blurhash display-none" #canvas width="32" height="32"></canvas>
     
-    @if (hasMultipleAttachments()) {
+    @if (hasMultipleAttachments() && !horizontal()) {
         <gallery
             [id]="galleryId()"
             class="feed-gallery"
