@@ -10,6 +10,8 @@ import { UserMuteRequest } from 'src/app/models/user-mute-request';
 import { PagedResult } from 'src/app/models/paged-result';
 import { UnfollowRequest } from 'src/app/models/unfollow-request';
 import { UserBlockRequest } from 'src/app/models/user-block-request';
+import { UserMove } from 'src/app/models/user-move';
+import { UserUnmove } from 'src/app/models/user-unmove';
 
 @Injectable({
     providedIn: 'root'
@@ -133,13 +135,23 @@ export class UsersService {
         await firstValueFrom(event$);
     }
 
+    public async move(userName: string, account: string, password: string): Promise<void> {
+        const event$ = this.httpClient.post(this.windowService.apiUrl() + '/api/v1/users/@' + userName + '/move', new UserMove(account, password));
+        await firstValueFrom(event$);
+    }
+
+    public async unmove(userName: string, password: string): Promise<void> {
+        const event$ = this.httpClient.post(this.windowService.apiUrl() + '/api/v1/users/@' + userName + '/unmove', new UserUnmove(password));
+        await firstValueFrom(event$);
+    }
+
     public async refresh(userName: string): Promise<void> {
         const event$ = this.httpClient.post(this.windowService.apiUrl() + '/api/v1/users/@' + userName + '/refresh', null);
         await firstValueFrom(event$);
     }
 
-    public async statuses(userName: string, minId?: string, maxId?: string, sinceId?: string, limit?: number): Promise<LinkableResult<Status>> {
-        const event$ = this.httpClient.get<LinkableResult<Status>>(this.windowService.apiUrl() +  '/api/v1/users/' + userName + `/statuses?minId=${minId ?? ''}&maxId=${maxId ?? ''}&sinceId=${sinceId ?? ''}&limit=${limit ?? ''}`);
+    public async statuses(userName: string, minId?: string, maxId?: string, sinceId?: string, limit?: number, onlyPinned = false): Promise<LinkableResult<Status>> {
+        const event$ = this.httpClient.get<LinkableResult<Status>>(this.windowService.apiUrl() +  '/api/v1/users/' + userName + `/statuses?minId=${minId ?? ''}&maxId=${maxId ?? ''}&sinceId=${sinceId ?? ''}&limit=${limit ?? ''}&onlyPinned=${onlyPinned}`);
         return await firstValueFrom(event$);
     }
 }

@@ -26,6 +26,7 @@ import { SettingsService } from 'src/app/services/http/settings.service';
 import { ConfirmationDialog } from 'src/app/dialogs/confirmation-dialog/confirmation.dialog';
 import { UserType } from 'src/app/models/user-type';
 import { Role } from 'src/app/models/role';
+import { UserPayload } from 'src/app/models/user-payload';
 
 @Component({
     selector: 'app-profile',
@@ -46,7 +47,7 @@ export class ProfilePage extends ReusableGalleryPageComponent implements OnInit,
     protected squareImages = signal(false);
     protected selectedProfilePageTab = signal(ProfilePageTab.Statuses);
     protected createdAt = signal<Date | undefined>(undefined);
-    protected signedInUser = signal<User | undefined>(undefined);
+    protected signedInUser = signal<UserPayload | undefined>(undefined);
     protected user = signal<User | undefined>(undefined);
     protected relationship = signal<Relationship | undefined>(undefined);
 
@@ -351,9 +352,14 @@ export class ProfilePage extends ReusableGalleryPageComponent implements OnInit,
     }
 
     private async loadFirstStatusesSet(): Promise<void> {
-        const statuses = await this.usersService.statuses(this.userName);
+        const [pinnedStatuses, statuses] = await Promise.all([
+            this.usersService.statuses(this.userName, undefined, undefined, undefined, undefined, true),
+            this.usersService.statuses(this.userName)
+        ]);
+
         statuses.context = ContextTimeline.user;
         statuses.user = this.user()?.userName;
+        statuses.data = [...pinnedStatuses.data, ...statuses.data];
 
         this.statuses.set(statuses);
     }
