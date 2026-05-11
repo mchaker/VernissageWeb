@@ -72,6 +72,8 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
 
     protected galleryId = computed(() => `feed-gallery-${this.mainStatus()?.id ?? 'unknown'}`);
     protected hasMultipleAttachments = computed(() => (this.mainStatus()?.attachments?.length ?? 0) > 1);
+    protected shouldRenderGallery = computed(() => this.hasMultipleAttachments() && !this.horizontal());
+    protected canShowDecorations = computed(() => this.imageIsLoaded() || this.hasMultipleAttachments());
 
 
     constructor() {
@@ -110,7 +112,7 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.blurhash = this.getMainAttachmentBlurhash();
 
-        if (this.hasMultipleAttachments()) {
+        if (this.shouldRenderGallery()) {
             this.loadGallery();
         }
 

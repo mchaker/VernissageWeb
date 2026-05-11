@@ -2,7 +2,7 @@
 <div class="image-container">
     <canvas class="blurhash display-none" #canvas width="32" height="32"></canvas>
     
-    @if (hasMultipleAttachments() && !horizontal()) {
+    @if (shouldRenderGallery()) {
         <gallery
             [id]="galleryId()"
             class="feed-gallery"
@@ -48,7 +48,7 @@
         }
     }
 
-    @if (imageIsLoaded() || hasMultipleAttachments()) {
+    @if (canShowDecorations()) {
         @if(showAvatar()) {
             @if (user(); as userObject) {
                 <div class="avatar" (mouseenter)="mouseenter.next()" (mouseleave)="mouseleave.next()">
