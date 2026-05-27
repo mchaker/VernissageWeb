@@ -1,19 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject, input, model, OnInit, output, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
-import { Observable } from 'rxjs/internal/Observable';
-import { map, switchMap } from 'rxjs/operators';
+//import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
+//import { Observable } from 'rxjs/internal/Observable';
+//import { map, switchMap } from 'rxjs/operators';
 import { ResponsiveComponent } from 'src/app/common/responsive';
-import { Country } from 'src/app/models/country';
+//import { Country } from 'src/app/models/country';
 import { License } from 'src/app/models/license';
-import { Location } from 'src/app/models/location';
+//import { Location } from 'src/app/models/location';
 import { UploadPhoto } from 'src/app/models/upload-photo';
 import { FileSizeService } from 'src/app/services/common/file-size.service';
 import { MessagesService } from 'src/app/services/common/messages.service';
 import { AttachmentsService } from 'src/app/services/http/attachments.service';
-import { CountriesService } from 'src/app/services/http/countries.service';
+//import { CountriesService } from 'src/app/services/http/countries.service';
 import { InstanceService } from 'src/app/services/http/instance.service';
-import { LocationsService } from 'src/app/services/http/locations.service';
+//import { LocationsService } from 'src/app/services/http/locations.service';
 import { SettingsService } from 'src/app/services/http/settings.service';
 import { PersistenceService } from 'src/app/services/persistance/persistance.service';
 
@@ -132,12 +132,13 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
         }*/
     }
 
-    /*public isValid(): boolean {
+    public isValid(): boolean {
         const descriptionLength = this.photo().description?.length ?? 0;
-        return this.countriesControl.valid && this.citiesControl.valid && descriptionLength <= this.maxDescriptionLength;
+        //return this.countriesControl.valid && this.citiesControl.valid && descriptionLength <= this.maxDescriptionLength;
+        return descriptionLength <= this.maxDescriptionLength;
     }
 
-    protected displayCountryFn(country: Country | string): string {
+    /*protected displayCountryFn(country: Country | string): string {
         if (typeof country === 'string') {
             return country;
         }
