@@ -45,6 +45,9 @@ import { HomeCardsComponent } from './widgets/home-cards/home-cards.component';
 import { PopoverComponent } from './widgets/popover/popover.component';
 import { StatusTextAutocompleteComponent } from './widgets/status-text-autocomplete/status-text-autocomplete.component';
 import { TagComponent } from './widgets/tag/tag.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { PipesModule } from '../pipes/pipes.module';
+import { LanguageSelectComponent } from './widgets/language-select/language-select.component';
 
 @NgModule({
     declarations: [
@@ -84,6 +87,7 @@ import { TagComponent } from './widgets/tag/tag.component';
         HomeCardsComponent,
         PopoverComponent,
         StatusTextAutocompleteComponent,
+        LanguageSelectComponent,
         TagComponent
     ],
     exports: [
@@ -100,6 +104,7 @@ import { TagComponent } from './widgets/tag/tag.component';
         UploadPhotoComponent,
         UsersCardComponent,
         UserCardComponent,
+        UserPopoverComponent,
         UserSelectorComponent,
         FollowButtonsSectionComponent,
         GalleryComponent,
@@ -127,6 +132,7 @@ import { TagComponent } from './widgets/tag/tag.component';
         HomeCardsComponent,
         PopoverComponent,
         StatusTextAutocompleteComponent,
+        LanguageSelectComponent,
         TagComponent,
         DirectivesModule
     ],
@@ -138,7 +144,9 @@ import { TagComponent } from './widgets/tag/tag.component';
         RouterModule,
         ValidationsModule,
         NgOptimizedImage,
-        DirectivesModule
+        DirectivesModule,
+        TranslateModule,
+        PipesModule
     ],
     providers: [
         provideHttpClient(withFetch(), withInterceptorsFromDi()),

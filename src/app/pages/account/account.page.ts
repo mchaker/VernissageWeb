@@ -42,6 +42,7 @@ import { UserBlockedDomainDialog } from 'src/app/dialogs/user-blocked-domain-dia
 import { UserBlockedDomainDialogEntity } from 'src/app/dialogs/user-blocked-domain-dialog/user-blocked-domain-dialog-entity';
 import { MoveAccountDialog } from 'src/app/dialogs/move-account-dialog/move-account.dialog';
 import { RestoreAccountDialog } from 'src/app/dialogs/restore-account-dialog/restore-account.dialog';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-account',
@@ -121,6 +122,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
     private dialog = inject(MatDialog);
     private clipboard = inject(Clipboard);
     private loadingService = inject(LoadingService);
+    private translateService = inject(TranslateService);
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
@@ -143,13 +145,13 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                     this.loadUserBlockedDomains(),
                 ]);
             } else {
-                this.messageService.showError('Cannot read username from token.');
+                this.messageService.showError(this.translateService.instant('pages.account.messages.cannotReadUserNameFromToken'));
             }
 
             const applicationBaseUrl = this.windowService.getApplicationBaseUrl()
             this.verification.set(`<a rel="me" href="${applicationBaseUrl}/@${this.user().userName}">Vernissage</a>`);
-        } catch {
-            this.messageService.showError('Error during downloading account data.');
+        } catch (error) {
+            this.messageService.showError(this.translateService.instant('pages.account.messages.errorDuringDownloadingAccountData'), error);
             await this.router.navigate(['/home']);
         } finally {
             this.isReady.set(true);
@@ -189,12 +191,16 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                 await this.usersService.update(userInternal.userName, userInternal);
                 await this.authorizationService.refreshAccessToken();
 
-                this.messageService.showSuccess('Account details have been successfully saved.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.accountDetailsSaved'));
             }
         } catch (error) {
             console.error(error);
             this.messageService.showServerError(error);
         }
+    }
+
+    protected onLocaleChange(locale: string | null): void {
+        this.user.update(user => Object.assign(new User(), user, { locale: locale ?? undefined }));
     }
 
     protected async onAvatarFormSubmit(): Promise<void> {
@@ -210,7 +216,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                 await this.loadUserData();
 
                 this.selectedAvatarFile.set(undefined);
-                this.messageService.showSuccess('Avatar has been saved.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.avatarSaved'));
             }
         } catch (error) {
             console.error(error);
@@ -227,7 +233,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
             if (userInternal.avatarUrl) {
                 await this.avatarsService.deleteAvatar(this.userName);
                 await this.loadUserData()
-                this.messageService.showSuccess('Avatar has been deleted.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.avatarDeleted'));
             }
         } catch (error) {
             console.error(error);
@@ -248,7 +254,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                 await this.loadUserData();
 
                 this.selectedHeaderFile.set(undefined);
-                this.messageService.showSuccess('Header has been saved.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.headerSaved'));
             }
         } catch (error) {
             console.error(error);
@@ -265,7 +271,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
             if (userInternal.headerUrl) {
                 await this.headersService.deleteHeader(this.userName);
                 await this.loadUserData();
-                this.messageService.showSuccess('Header has been deleted.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.headerDeleted'));
             }
         } catch (error) {
             console.error(error);
@@ -312,7 +318,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
 
     protected onCopyVerification(): void {
         this.clipboard.copy(this.verification());
-        this.messageService.showSuccess('Verification code has been copied into clipboard.');
+        this.messageService.showSuccess(this.translateService.instant('pages.account.messages.verificationCodeCopied'));
     }
 
     protected async resentConfirmationEmail(): Promise<void> {
@@ -321,7 +327,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
             resendEmailConfirmation.redirectBaseUrl = this.windowService.getApplicationUrl();
 
             await this.accountService.resend(resendEmailConfirmation);
-            this.messageService.showSuccess('The email has been sent and should arrive in your inbox shortly.');
+            this.messageService.showSuccess(this.translateService.instant('pages.account.messages.confirmationEmailSent'));
         } catch (error) {
             console.error(error);
             this.messageService.showServerError(error);
@@ -384,7 +390,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
     protected onUserAliasDelete(userAlias: UserAlias): void {
         const dialogRef = this.dialog.open(ConfirmationDialog, {
             width: '500px',
-            data: 'Do you want to delete user account alias?'
+            data: this.translateService.instant('pages.account.confirmations.deleteUserAccountAlias')
         });
 
         dialogRef.afterClosed().subscribe(async (result) => {
@@ -393,7 +399,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                     await this.userAliasesService.delete(userAlias.id);
                     await this.loadUserAliases();
 
-                    this.messageService.showSuccess('Account alias has been deleted.');
+                    this.messageService.showSuccess(this.translateService.instant('pages.account.messages.accountAliasDeleted'));
                 } catch (error) {
                     console.error(error);
                     this.messageService.showServerError(error);
@@ -429,7 +435,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
     protected openUserBlockDomain(userBlockedDomain: UserBlockedDomain): void {
         const dialogRef = this.dialog.open(UserBlockedDomainDialog, {
             width: '500px',
-            data: new UserBlockedDomainDialogEntity('Edit blocked domain', userBlockedDomain, false)
+            data: new UserBlockedDomainDialogEntity(this.translateService.instant('pages.account.userBlockedDomains.editBlockedDomain'), userBlockedDomain, false)
         });
 
         dialogRef.afterClosed().subscribe(async (result) => {
@@ -447,7 +453,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
     protected onUserBlockedDomainDelete(userBlockedDomain: UserBlockedDomain): void {
         const dialogRef = this.dialog.open(ConfirmationDialog, {
             width: '500px',
-            data: 'Do you want to delete blocked domain?'
+            data: this.translateService.instant('pages.account.confirmations.deleteBlockedDomain')
         });
 
         dialogRef.afterClosed().subscribe(async (result) => {
@@ -456,7 +462,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
                     await this.userBlockedDomainsService.delete(userBlockedDomain.id);
                     await this.loadUserBlockedDomains();
 
-                    this.messageService.showSuccess('Blocked domain has been deleted.');
+                    this.messageService.showSuccess(this.translateService.instant('pages.account.messages.blockedDomainDeleted'));
                 } catch (error) {
                     console.error(error);
                     this.messageService.showServerError(error);
@@ -470,7 +476,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
             await this.archivesService.create();
             await this.loadArchives();
 
-            this.messageService.showSuccess('Archive has been requested.');
+            this.messageService.showSuccess(this.translateService.instant('pages.account.messages.archiveRequested'));
         } catch (error) {
             console.error(error);
             this.messageService.showServerError(error);
@@ -537,7 +543,7 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
 
         const file = input.files[0];
         if (file.size > this.defaultImportMaxFileSize) {
-            this.messageService.showError(`Uploaded file is too large. Maximum size is ${this.maxImportFileSizeString()}.`);
+            this.messageService.showError(this.translateService.instant('pages.account.messages.importFileTooLarge', { maxImportFileSize: this.maxImportFileSizeString() }));
             return;
         }
 
@@ -568,10 +574,10 @@ export class AccountPage extends ResponsiveComponent implements OnInit {
         try {
             if (!this.isSupporterFlagEnabled()) {
                 await this.accountService.disableSupporterFlag();
-                this.messageService.showSuccess('Supporter flag has been disabled.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.supporterFlagDisabled'));
             } else {
                 await this.accountService.enableSupporterFlag();
-                this.messageService.showSuccess('Supporter flag has been enabled.');
+                this.messageService.showSuccess(this.translateService.instant('pages.account.messages.supporterFlagEnabled'));
             }
         } catch (error) {
             console.error(error);

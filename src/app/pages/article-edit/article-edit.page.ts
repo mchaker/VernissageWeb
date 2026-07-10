@@ -10,6 +10,7 @@ import { FileSizeService } from 'src/app/services/common/file-size.service';
 import { LoadingService } from 'src/app/services/common/loading.service';
 import { MessagesService } from 'src/app/services/common/messages.service';
 import { ArticlesService } from 'src/app/services/http/articles.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-article-edit',
@@ -27,6 +28,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
     protected mainArticleFileInfoId = model<string | undefined>(undefined);
     protected articleFileInfos = signal<ArticleFileInfo[]>([]);
     protected alternativeAuthor = model('');
+    protected language = model<string | null>(null);
     protected showInNewsSignIn = model(false);
     protected showInNewsSignOut = model(false);
     protected showInHomeSignIn = model(false);
@@ -43,6 +45,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
     private fileSizeService = inject(FileSizeService);
     private clipboard = inject(Clipboard);
     private router = inject(Router);
+    private translateService = inject(TranslateService);
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
@@ -62,6 +65,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
                     this.color.set(article.color ?? '');
                     this.mainArticleFileInfoId.set(article.mainArticleFileInfo?.id);
                     this.alternativeAuthor.set(article.alternativeAuthor ?? '');
+                    this.language.set(article.language ?? null);
                     this.articleFileInfos.set(article.articleFileInfos ?? []);
 
                     for(const visibility of article.visibilities ?? []) {
@@ -106,6 +110,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
             article.title = this.title();
             article.body = this.body();
             article.color = this.color();
+            article.language = this.language();
             article.visibilities = [];
 
             if (this.alternativeAuthor()) {
@@ -130,10 +135,10 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
 
             if (this.id()) {
                 await this.articlesService.update(this.id(), article);
-                this.messageService.showSuccess('The article has been updated.');                
+                this.messageService.showSuccess(this.translateService.instant('pages.articleEdit.messages.updated'));
             } else {
                 await this.articlesService.create(article);
-                this.messageService.showSuccess('The article has been saved.');
+                this.messageService.showSuccess(this.translateService.instant('pages.articleEdit.messages.saved'));
             }
             
             this.router.navigate(['/articles']);
@@ -151,7 +156,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
 
         const file = input.files[0];
         if (file.size > this.defaultArticleMaxFileSize) {
-            this.messageService.showError(`Uploaded file is too large. Maximum size is ${this.maxArticleFileSizeString()}.`);
+            this.messageService.showError(this.translateService.instant('pages.articleEdit.messages.fileTooLarge', { maxArticleFileSize: this.maxArticleFileSizeString() }));
             return;
         }
 
@@ -214,6 +219,6 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
 
     protected onCopyMarkdown(articleFileInfo: ArticleFileInfo): void {
         this.clipboard.copy(`![Image ${articleFileInfo.id}](${articleFileInfo.url})`);
-        this.messageService.showSuccess('Markdown code has been copied into clipboard.');
+        this.messageService.showSuccess(this.translateService.instant('pages.articleEdit.messages.markdownCopied'));
     }
 }

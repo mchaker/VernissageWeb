@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, OnDestroy, OnInit, PLATFORM_ID, signal, viewChild } from '@angular/core';
 import { Gallery, ImageItem } from 'ng-gallery';
+import { TranslateService } from '@ngx-translate/core';
 import { decode } from 'blurhash';
 import { AvatarSize } from '../avatar/avatar-size';
 import { User } from 'src/app/models/user';
@@ -70,6 +71,7 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
     private messageService = inject(MessagesService);
     private authorizationService = inject(AuthorizationService);
     private galleryService = inject(Gallery);
+    private translateService = inject(TranslateService);
 
     protected galleryId = computed(() => `feed-gallery-${this.mainStatus()?.id ?? 'unknown'}`);
     protected hasMultipleAttachments = computed(() => (this.mainStatus()?.attachments?.length ?? 0) > 1);
@@ -157,11 +159,11 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.isFavourited()) {
                 await this.statusesService.unfavourite(this.mainStatus().id);
                 this.isFavourited.set(false);
-                this.messageService.showSuccess('Your like has been undone.');
+                this.messageService.showSuccess(this.translateService.instant('components.image.messages.yourLikeHasBeenUndone'));
             } else {
                 await this.statusesService.favourite(this.mainStatus().id);
                 this.isFavourited.set(true);
-                this.messageService.showSuccess('Status favourited.');
+                this.messageService.showSuccess(this.translateService.instant('components.image.messages.statusFavourited'));
             }
         } catch (error) {
             console.error(error);
@@ -174,11 +176,11 @@ export class ImageComponent implements OnInit, OnDestroy, AfterViewInit {
             if (this.isReblogged()) {
                 await this.statusesService.unreblog(this.mainStatus().id);
                 this.isReblogged.set(false);
-                this.messageService.showSuccess('Your boost has been undone.');
+                this.messageService.showSuccess(this.translateService.instant('components.image.messages.yourBoostHasBeenUndone'));
             } else {
                 await this.statusesService.reblog(this.mainStatus().id);
                 this.isReblogged.set(true);
-                this.messageService.showSuccess('Status boosted.');
+                this.messageService.showSuccess(this.translateService.instant('components.image.messages.statusBoosted'));
             }
         } catch (error) {
             console.error(error);

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, OnInit, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, model, OnInit, output, signal, viewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Status } from 'src/app/models/status';
 import { StatusRequest } from 'src/app/models/status-request';
 import { MessagesService } from 'src/app/services/common/messages.service';
@@ -37,10 +38,13 @@ export class CommentReplyComponent implements OnInit {
     });
 
     private commentForm = viewChild<NgForm>('commentForm');
+    private commentTextArea = viewChild<ElementRef<HTMLTextAreaElement>>('commentTextArea');
 
     private statusesService = inject(StatusesService);
     private instanceService = inject(InstanceService);
     private messageService = inject(MessagesService);
+    private translateService = inject(TranslateService);
+    private initializedStatusId?: string;
 
     constructor() {
         effect(() => this.fillUserName(this.status()));
@@ -49,6 +53,17 @@ export class CommentReplyComponent implements OnInit {
     ngOnInit(): void {
         this.maxStatusLength.set(this.instanceService.instance?.configuration?.statuses?.maxCharacters ?? 500);
         this.fillUserName(this.status());
+    }
+
+    public focusTextAreaAtEnd(): void {
+        const textAreaElement = this.commentTextArea()?.nativeElement;
+        if (!textAreaElement) {
+            return;
+        }
+
+        const cursorPosition = textAreaElement.value.length;
+        textAreaElement.focus();
+        textAreaElement.setSelectionRange(cursorPosition, cursorPosition);
     }
 
     protected async onSubmitComment(): Promise<void> {
@@ -65,10 +80,10 @@ export class CommentReplyComponent implements OnInit {
                 this.commentForm()?.resetForm();
 
                 setTimeout(() => {
-                    this.fillUserName(this.status());
+                    this.fillUserName(this.status(), true);
                 });
 
-                this.messageService.showSuccess('Comment has been added.');
+                this.messageService.showSuccess(this.translateService.instant('components.commentReply.messages.commentHasBeenAdded'));
                 this.added.emit();
             }
         } catch (error) {
@@ -83,10 +98,15 @@ export class CommentReplyComponent implements OnInit {
         this.clickCancel.emit();
     }
 
-    private fillUserName(status: Status): void {
+    private fillUserName(status: Status, force = false): void {
+        if (!force && this.initializedStatusId === status.id) {
+            return;
+        }
+
         const userName = status.user?.userName;
         if (userName) {
             this.comment.set(`@${userName} `);
+            this.initializedStatusId = status.id;
         }
     }
 }
