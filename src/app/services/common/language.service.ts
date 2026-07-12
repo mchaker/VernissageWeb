@@ -1,24 +1,11 @@
-import { isPlatformBrowser } from '@angular/common';
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
-import type { Request } from 'express';
-import { REQUEST } from 'express.tokens';
 import type { HeaderLanguage, Language } from 'src/app/models/language';
 import { PreferencesService } from './preferences.service';
 
 export const SUPPORTED_LANGUAGES: readonly Language[] = [
-    { locale: 'en_US', labelKey: 'pages.register.language.english' },
-    { locale: 'en_GB', labelKey: 'pages.register.language.englishGb' },
-    { locale: 'fi_FI', labelKey: 'pages.register.language.finnish' },
-    { locale: 'fr_FR', labelKey: 'pages.register.language.french' },
-    { locale: 'es_ES', labelKey: 'pages.register.language.spanish' },
-    { locale: 'de_DE', labelKey: 'pages.register.language.german' },
-    // { locale: 'nb_NO', labelKey: 'pages.register.language.norwegian' },
-    { locale: 'pl_PL', labelKey: 'pages.register.language.polish' },
-    // { locale: 'pt_PT', labelKey: 'pages.register.language.portuguese' },
-    // { locale: 'sv_SE', labelKey: 'pages.register.language.swedish' },
-    { locale: 'it_IT', labelKey: 'pages.register.language.italian' }
+    { locale: 'en_US', labelKey: 'pages.register.language.english' }
 ];
 
 export function getLanguageFlag(locale: string): string {
@@ -49,17 +36,11 @@ export class LanguageService {
         return locales;
     }, {});
 
-    private platformId = inject(PLATFORM_ID);
-    private request: Request | null = inject(REQUEST, { optional: true });
     private preferencesService = inject(PreferencesService);
     private translateService = inject(TranslateService);
 
     async initializeLanguage(): Promise<void> {
-        const languageFromPreferences = this.normalizeLanguage(this.preferencesService.language);
-        const languageFromEnvironment = isPlatformBrowser(this.platformId) ? this.getLanguageFromNavigator() : this.getLanguageFromRequestHeader();
-        const language = languageFromPreferences ?? languageFromEnvironment ?? this.defaultLanguage;
-
-        await this.setLanguage(language, false);
+        await this.setLanguage(this.defaultLanguage, false);
     }
 
     async setLanguageFromLocale(locale: string | null | undefined, persist = true): Promise<void> {
@@ -89,34 +70,13 @@ export class LanguageService {
     }
 
     private async setLanguage(language: string, persist: boolean): Promise<void> {
-        const normalizedLanguage = this.normalizeLanguage(language) ?? this.defaultLanguage;
-
         this.translateService.addLangs(this.supportedLanguages);
         await firstValueFrom(this.translateService.setFallbackLang(this.defaultLanguage));
-        await firstValueFrom(this.translateService.use(normalizedLanguage));
+        await firstValueFrom(this.translateService.use(this.defaultLanguage));
 
         if (persist) {
-            this.preferencesService.language = normalizedLanguage;
+            this.preferencesService.language = this.defaultLanguage;
         }
-    }
-
-    private getLanguageFromRequestHeader(): string | null {
-        const acceptLanguageHeader = this.request?.headers['accept-language'];
-        if (!acceptLanguageHeader) {
-            return null;
-        }
-
-        const rawHeaderValue = Array.isArray(acceptLanguageHeader) ? acceptLanguageHeader[0] : acceptLanguageHeader;
-        const headerParts = rawHeaderValue.split(',');
-        if (headerParts.length === 0) {
-            return null;
-        }
-
-        return this.normalizeLanguage(headerParts[0] ?? null);
-    }
-
-    private getLanguageFromNavigator(): string | null {
-        return this.normalizeLanguage(globalThis.navigator?.language ?? null);
     }
 
     private normalizeLanguage(language: string | null | undefined): string | null {
