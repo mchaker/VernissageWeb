@@ -11,6 +11,7 @@
       "clear": "Tyhjennä",
       "close": "Sulje",
       "copy": "Kopioi",
+      "copyDetails": "Kopioi tiedot",
       "delete": "Poista",
       "disable": "Poista käytöstä",
       "dismiss": "Ohita",
@@ -41,11 +42,15 @@
       "show": "Näytä",
       "signOut": "Kirjaudu ulos",
       "signUp": "Rekisteröidy",
+      "suppress": "Rajoita",
+      "suppressed": "Rajoitettu",
       "tryAgain": "uudelleen",
       "unblock": "Kumoa esto",
       "unfollow": "Lopeta seuraaminen",
+      "unsuppress": "Poista rajoitus",
       "update": "Päivitä",
-      "upload": "Lataa"
+      "upload": "Lataa",
+      "toTheTop": "Takaisin ylös"
     },
     "articleVisibility": {
       "homeSignIn": "Etusivu - kirjaudu sisään",
@@ -148,6 +153,7 @@
       "unrecoverableState": "Tapahtui virhe, eikä sovelluksen tilaa voi palauttaa. Lataa sivu uudelleen."
     },
     "pageTitles": {
+      "directMessages": "Yksityisviestit",
       "accessForbidden": "Vernissage - Pääsy kielletty",
       "account": "Vernissage - Tili",
       "activityPubEventRecipients": "Vernissage - ActivityPub-tapahtuman vastaanottajat",
@@ -155,6 +161,10 @@
       "articles": "Vernissage - Artikkelit",
       "bookmarks": "Vernissage - Kirjanmerkit",
       "categories": "Vernissage - Luokat",
+      "cameras": "Vernissage - Kamerat",
+      "explore": "Vernissage - Selaa",
+      "films": "Vernissage - Filmit",
+      "lenses": "Vernissage - Objektiivit",
       "confirmEmail": "Vernissage - Vahvista sähköposti",
       "connectionLost": "Vernissage - Yhteys katkesi",
       "createArticle": "Vernissage - Luo artikkeli",
@@ -244,6 +254,8 @@
         "doYouWantToDeleteCategory": "Haluatko poistaa luokan?"
       },
       "texts": {
+        "alwaysRecalculateRemoteStatusCategory": "Laske etäpalvelimelta tulevien tilapäivitysten luokka aina uudelleen",
+        "alwaysRecalculateRemoteStatusCategoryDescription": "Kun asetus on käytössä, saapuvien ActivityPub-tilapäivitysten luokat lasketaan uudelleen paikallisten aihetunnisteiden luokittelusääntöjen perusteella. Jos vastaavaa sääntöä ei löydy, käytetään etäpalvelimen ilmoittamaa luokkaa.",
         "categoryName": "Luokan nimi",
         "newCategory": "Uusi luokka"
       }
@@ -284,6 +296,7 @@
     },
     "followButtons": {
       "actions": {
+        "directMessage": "Yksityisviesti",
         "approveFollow": "Hyväksy seuraaminen",
         "blockDomain": "Estä verkkotunnus",
         "blockUser": "Estä käyttäjä",
@@ -497,6 +510,9 @@
         "isRegistrationOpened": "Onko rekisteröinti avattu",
         "isWebPushEnabled": "Ovatko WebPush-ilmoitukset käytössä",
         "showCategoriesForAnonymous": "Näytä luokat anonyymille käyttäjälle",
+        "showCamerasForAnonymous": "Näytä kamerat anonyymille käyttäjälle",
+        "showLensesForAnonymous": "Näytä objektiivit anonyymille käyttäjälle",
+        "showFilmsForAnonymous": "Näytä filmit anonyymille käyttäjälle",
         "showEditorsStatusesChoiceForAnonymous": "Näytä editorin tilavalinta anonyymille käyttäjälle",
         "showEditorsUsersChoiceForAnonymous": "Näytä editorin käyttäjien valinta anonyymille käyttäjälle",
         "showHashtagsForAnonymous": "Näytä hashtagit anonyymille käyttäjälle",
@@ -516,9 +532,10 @@
       "applicationLogo": "Sovelluksen logo",
       "menuWithActions": "Valikko toiminnoilla",
       "navigation": {
+        "directMessages": "Yksityisviestit",
         "account": "Tili",
         "articles": "Artikkelit",
-        "categories": "Luokat",
+        "explore": "Tutustu",
         "editorsChoice": "Toimittajan valinta",
         "errors": "Virheet",
         "events": "Tapahtumat",
@@ -702,6 +719,7 @@
         "software": "Ohjelmisto:",
         "tooLongAltText": "Liian pitkä vaihtoehtoinen teksti.",
         "uploading": "Ladataan...",
+        "useGeohash": "Käytä Geohashia",
         "warning": "Varoitus:",
         "withoutALicense": "Ilman lisenssiä"
       }
@@ -719,6 +737,44 @@
     }
   },
   "dialogs": {
+    "preserveContentCredentials": {
+      "originalTitle": "Upload the original photo?",
+      "originalPrompt": "Would you like to upload “{fileName}” in its original form? All metadata will be preserved, including EXIF location data if present.",
+      "originalBenefits": "The original file preserves the exact image data, color profile and detail, which can matter for photography such as astrophotography.",
+      "standardProcessing": "Choose No to remove metadata and re-export the photo as JPEG. C2PA Content Credentials, if present, will not be preserved.",
+      "title": "Preserve C2PA Content Credentials?",
+      "detected": "The file “{fileName}” contains C2PA Content Credentials.",
+      "metadata": "To preserve these credentials, the original file must be stored and distributed with all of its embedded metadata, including location data if present.",
+      "privacy": "Continue only if you are sure the file contains no information you wish to keep private or that could put your privacy at risk. This original file, including all metadata, will be sent to your followers’ servers.",
+      "no": "No",
+      "yes": "Yes, I’m sure"
+    },
+    "contentCredentials": {
+      "labels": {
+        "actions": "Actions",
+        "format": "Format",
+        "ingredients": "Ingredients",
+        "producedWith": "Produced with",
+        "signedAt": "Signed at",
+        "signedBy": "Signed by",
+        "title": "Title",
+        "identity": "Identity",
+        "actionsCount": "Actions count",
+        "verify": "Verify",
+        "appOrDeviceUsed": "App or device used"
+      },
+      "texts": {
+        "verifiedSummary": "The image contains a valid C2PA manifest and passed client-side validation.",
+        "validationCaution": "This does not necessarily mean the image was forged. Re-exporting or processing the image on another server can also break validation.",
+        "validationErrors": "Validation error details",
+        "signatureMismatch": "The C2PA signature is invalid.",
+        "hashMismatch": "The hash of the image or an ingredient does not match the C2PA manifest."
+      },
+      "title": "Content Credentials",
+      "actions": {
+        "openOnVerifySite": "Open on Verify Site"
+      }
+    },
     "category": {
       "attrs": {
         "categoryName": "Luokan nimi",
@@ -853,6 +909,15 @@
         "requestSent": "Pyyntö lähetetty"
       }
     },
+    "geohash": {
+      "texts": {
+        "enterGeohash": "Syötä geohash",
+        "geohash": "Geohash",
+        "geohashIsNotValid": "Geohash ei kelpaa",
+        "latitude": "Leveysaste",
+        "longitude": "Pituusaste"
+      }
+    },
     "homeCard": {
       "attrs": {
         "homeCardTitle": "Kotikortin otsikko",
@@ -951,11 +1016,11 @@
         "muteDialogHeader": "Mykistetyt julkaisut ja tehostukset eivät näy useimmilla järjestelmän aikajanoilla.",
         "muteEndDate": "Mykistyksen loppuaika",
         "muteNewStatuses": "Hiljennä uudet päivitykset",
-        "muteNotifications": "Mykistä ilmoitukset",
+        "muteNotifications": "Hiljennä ilmoitukset",
         "muteReblogs": "Mykistä tehostukset",
         "optionalDateWhenMutingWillEnd": "Valinnainen päivämäärä, jolloin mykistys päättyy.",
         "removeUsersReblogsFromYourTimeline": "Poista käyttäjän tehostukset aikajanaltasi",
-        "removeUsersStatusesFromYourTimeline": "Poista käyttäjän päivitykset aikajanaltasi"
+        "removeUsersStatusesFromYourTimeline": "Poista käyttäjän julkaisut aikajanaltasi"
       }
     },
     "notificationSettings": {
@@ -967,6 +1032,7 @@
         "webPushPublicKeyIsNotSet": "Web pushin julkista avainta ei ole asetettu."
       },
       "texts": {
+        "newDirectMessage": "Uusi yksityisviesti",
         "boostedStatus": "Päivitystä tehostettu",
         "newCommentAdded": "Uusi kommentti lisätty",
         "newFollowRequest": "Uusi seurantapyyntö",
@@ -1490,6 +1556,40 @@
     }
   },
   "pages": {
+    "directMessages": {
+      "emailVerificationRequired": "Vahvista sähköpostiosoitteesi ennen viestin lähettämistä.",
+      "like": "Tykkää viestistä",
+      "unlike": "Poista tykkäys viestistä",
+      "liked": "Tykkätty viesti",
+      "deleteMessage": "Poista viesti",
+      "confirmDelete": "Haluatko varmasti poistaa tämän viestin?",
+      "deletedMessage": "Käyttäjä poisti tämän viestin.",
+      "privacyNotice": "Yksityisviestejä ei ole päästä päähän salattu. Älä jaa arkaluonteisia tietoja.",
+      "title": "Yksityisviestit",
+      "subtitle": "Yksityisiä keskusteluja fediversumissa.",
+      "newMessage": "Uusi viesti",
+      "conversations": "Keskustelut",
+      "searchConversations": "Hae keskusteluja",
+      "image": "Kuva",
+      "unread": "Lukemattomat viestit",
+      "loadError": "Viestien lataaminen epäonnistui. Yritä uudelleen.",
+      "noResults": "Hakua vastaavia keskusteluja ei löytynyt.",
+      "noConversations": "Ei vielä keskusteluja.",
+      "removeRecipient": "Poista vastaanottaja",
+      "participants": "{count, plural, one {# osallistuja} other {# osallistujaa}}",
+      "searchUser": "Hae vastaanottajaa",
+      "add": "Lisää",
+      "mute": "Mykistä keskustelu",
+      "unmute": "Poista keskustelun mykistys",
+      "history": "Viestihistoria",
+      "olderMessages": "Lataa vanhempia viestejä",
+      "chooseRecipients": "Hae käyttäjää ja aloita keskustelu napsauttamalla Lisää.",
+      "removeImage": "Poista kuva",
+      "writeMessage": "Kirjoita viesti...",
+      "addImage": "Lisää kuva",
+      "selectConversation": "Valitse keskustelu tai aloita uusi viesti.",
+      "invalidImage": "Valitse tuetussa muodossa oleva kuva, joka ei ylitä palvelimen tiedostokokorajoitusta."
+    },
     "account": {
       "avatar": {
         "removeAriaLabel": "Poista avatar",
@@ -1812,9 +1912,22 @@
     "bookmarks": {
       "title": "Kirjanmerkit"
     },
-    "categories": {
-      "subtitle": "Luettelo palvelimella olevista luokista ja niihin liitetyistä kuvista.",
-      "title": "Luokat"
+    "explore": {
+      "searchCriteria": "Hakuehdot",
+      "subtitles": {
+        "cameras": "Selaa kuvia niiden ottamiseen käytettyjen kameroiden mukaan.",
+        "categories": "Selaa kuvia palvelimella käytettävissä olevien luokkien mukaan.",
+        "films": "Selaa kuvia niiden kuvaamiseen käytettyjen filmien mukaan.",
+        "lenses": "Selaa kuvia niiden ottamiseen käytettyjen objektiivien mukaan."
+      },
+      "tabAriaLabel": "Hakutyyppi",
+      "tabs": {
+        "cameras": "Kamerat",
+        "categories": "Luokat",
+        "films": "Filmit",
+        "lenses": "Objektiivit"
+      },
+      "title": "Selaa"
     },
     "confirmEmail": {
       "error": {
@@ -1981,7 +2094,7 @@
         "description": "Kyllä. Vernissage tarjoaa käyttäjille laajan näppäimistönavigoinnin, joka auttaa sinua siirtymään nopeasti sivujen, aikajanan ja toimintojen välillä.",
         "footer": "Nämä pikanäppäimet on suunniteltu parantamaan käytettävyyttä ja nopeuttamaan selaamista – erityisen hyödyllistä näppäimistökeskeisille käyttäjille.",
         "globalShortcuts": {
-          "categories": "Näytä luokat",
+          "explore": "Avaa Selaus",
           "editorsChoice": "Avaa Toimittajan valinnat -aikajana",
           "faq": "Avaa tämä UKK-sivu",
           "home": "Siirry kotiaikajanalle",
@@ -1994,8 +2107,10 @@
         "statusDetailShortcuts": {
           "bookmark": "Tallenna päivitys kirjanmerkkeihin",
           "boost": "Tehosta päivitystä",
+          "closePhotoPreview": "Sulje kuvan esikatselu",
           "like": "Tykkää päivityksestä",
           "nextStatus": "Katso seuraava päivitys",
+          "openPhotoPreview": "Avaa kuvan esikatselu",
           "previousStatus": "Näytä edellinen päivitys"
         },
         "statusDetailShortcutsTitle": "Päivityksen tiedot -sivulla:",
@@ -2083,17 +2198,20 @@
     },
     "notifications": {
       "actions": {
+        "openConversation": "Avaa keskustelu",
         "openUserProfileAriaLabel": "Avaa käyttäjäprofiili",
         "refreshCurrentTimelineAriaLabel": "Päivitä nykyinen aikajana"
       },
       "labels": {
-        "latest": "viimeisin"
+        "latest": "uusin"
       },
       "title": "Ilmoitukset",
       "types": {
         "adminReport": "on raportoitu",
         "adminSignUp": "on uusi käyttäjä",
+        "directMessage": "lähetti sinulle yksityisviestin",
         "favouriteComment": "lisäsi kommenttisi suosikkeihin",
+        "favouriteConversationComment": "tykkäsi kommentistasi keskustelussa",
         "favouriteStatus": "lisäsi valokuvasi suosikkeihin",
         "follow": "seurannut sinua",
         "followRequest": "haluaa seurata sinua",
@@ -2118,6 +2236,10 @@
         "title": "Käyttäjän profiiligalleria"
       },
       "media": {
+        "alwaysAskToUploadOriginalImage": {
+          "title": "Always ask about uploading the original photo",
+          "description": "Before each upload, choose whether to remove metadata and re-export the photo as JPEG, or preserve the original file with all metadata, including EXIF location data if present."
+        },
         "alwaysShowNsfw": {
           "description": "Näytä kaikki NSFW (arkaluontoinen) media ilman varoituksia.",
           "title": "Näytä aina NSFW"
@@ -2129,6 +2251,10 @@
         "autoScrollGalleryImages": {
           "description": "Selaa automaattisesti kuvapäivityksiä 6 sekunnin välein.",
           "title": "Selaa kuvia automaattisesti päivitysgalleriassa"
+        },
+        "hideAiFeatures": {
+          "description": "Piilottaa tekoälypainikkeet ja niihin liittyvät tekstit kuvia lisättäessä.",
+          "title": "Piilota tekoälytoiminnot"
         },
         "showAlternativeText": {
           "description": "Näytä vaihtoehtoinen teksti, jos sellainen on päivityksen lisätiedoissa.",
@@ -2171,6 +2297,10 @@
       "actions": {
         "profileQrCodeAriaLabel": "Profiilin QR-koodi",
         "shareBusinessCardAriaLabel": "Jaa käyntikortti"
+      },
+      "accountModeration": {
+        "blocked": "Palvelimen moderaattori on estänyt tämän tilin. Se ei voi seurata tämän palvelimen tilejä, sitä voi seurata, eikä sen julkaisuja näytetä täällä.",
+        "suppressed": "Palvelimen moderaattori on hiljentänyt tämän tilin. Se voi edelleen seurata tämän palvelimen tilejä ja sitä voi seurata, mutta sen julkaisemia uusia kuvia ei näytetä tällä sivustolla."
       },
       "confirmations": {
         "createBusinessCard": "Et ole vielä luonut käyntikorttia. Haluatko luoda sen nyt?"
@@ -2223,6 +2353,7 @@
         "emailRequired": "Anna sähköpostiosoite.",
         "emailTaken": "Valitse toinen sähköpostiosoite, tämä on jo yhdistetty eri tiliin.",
         "invalidCaptchaCode": "Captcha-koodi on virheellinen. Yritä uudelleen.",
+        "registrationIsDisabled": "Rekisteröityminen ilman kutsukoodia tai liittymisen syytä on poistettu käytöstä.",
         "invitationCodeRequired": "Syötä kutsukoodi.",
         "invitationCodeTooLong": "Kutsukoodi on liian pitkä.",
         "invitationTokenInvalid": "Kutsutunnus on virheellinen.",
@@ -2338,6 +2469,7 @@
         "users": "Käyttäjiä ei löytynyt."
       },
       "hint": "Etsi käyttäjä, tila tai aihetunniste, tai lisää päivityksen tai käyttäjätilin URL.",
+      "showOnlyMyStatuses": "Näytä vain omat tilapäivitykseni",
       "tabs": {
         "hashtags": "Aihetunnisteet",
         "statuses": "Päivitykset",
@@ -2410,7 +2542,7 @@
         "bookmark": "Kirjanmerkki",
         "boost": "Tehosta",
         "feature": "Ominaisuus",
-        "like": "Kuten",
+        "like": "Tykkää",
         "openProfileAriaLabel": "Avaa profiili @{userName}",
         "unbookmark": "Poista kirjanmerkki",
         "unboost": "Poista tehostus",
@@ -2430,7 +2562,24 @@
         "title": "Kommentit"
       },
       "confirmations": {
-        "changeStatusWithEnteredComment": "Olet kirjoittanut kommentin. Haluatko silti vaihtaa tilaa?"
+        "changeStatusWithEnteredComment": "Olet kirjoittanut kommentin. Haluatko silti siirtyä pois?"
+      },
+      "contentCredentials": {
+        "label": "Content Credentials",
+        "verified": "Content Credentials verified",
+        "title": "Content Credentials",
+        "author": "Author",
+        "equipmentOrApplication": "Equipment/Application",
+        "details": "Details",
+        "appOrDeviceUsed": "App or device used",
+        "aiGenerated": "AI Generated",
+        "validation": {
+          "verified": "C2PA integrity and signature trust verified",
+          "untrusted": "Integrity verified. Certificate issuer not verified",
+          "invalid": "C2PA integrity verification failed",
+          "unknown": "C2PA verification result is unavailable"
+        },
+        "unverifiedMetadata": "The author, device and image history shown below are unverified."
       },
       "followedTagsInThisStatus": "Päivityksen aihetunnisteita seurataan nyt",
       "hashtagsAriaLabel": "Aihetunnisteet",
@@ -2598,6 +2747,8 @@
         "tooManyFilesSelectedSingular": "Liian monta tiedostoa valittu. Voit lisätä vielä yhden kuvan.",
         "tooManyFilesSelectedPlural": "Liian monta tiedostoa valittu. Voit lisätä vielä {count} kuvaa.",
         "unableToResize": "Kuvan kokoa ei voi muuttaa ennen latausta.",
+        "uploadFailed": "Kuvaa ei voitu ladata. Tarkista verkkoyhteys ja yritä lisätä tiedosto uudelleen.",
+        "uploadFailedTitle": "Kuvan lataus epäonnistui",
         "unsupportedFileType": "Tätä tiedostotyyppiä ei tueta. Lataa JPG-, PNG- tai WEBP-kuva.",
         "verifyEmailBeforePublish": "Jos haluat julkaista päivityksen, vahvista ensin sähköpostiosoitteesi."
       },
@@ -2639,7 +2790,8 @@
       },
       "filters": {
         "onlyBlocked": "Vain estetyt",
-        "onlyLocal": "Vain paikalliset"
+        "onlyLocal": "Vain paikalliset",
+        "onlySuppressed": "Vain rajoitetut"
       },
       "messages": {
         "accountApproved": "Tili on hyväksytty.",
@@ -2650,6 +2802,8 @@
         "accountMarkedAsSupporter": "Tili on merkitty tukijaksi.",
         "accountRefreshed": "Tili on päivitetty.",
         "accountRejected": "Tili on hylätty.",
+        "accountSuppressed": "Käyttäjä on rajoitettu.",
+        "accountUnsuppressed": "Käyttäjän rajoitus on poistettu.",
         "twoFactorDisabled": "Kaksivaiheinen tunnistautuminen on poistettu käytöstä.",
         "userBlocked": "Käyttäjä on estetty.",
         "userUnblocked": "Käyttäjän esto on kumottu."

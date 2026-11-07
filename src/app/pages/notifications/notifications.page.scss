@@ -1,4 +1,8 @@
 .notifications-container {
+    .icon.direct-message {
+        color: var(--mat-sys-primary);
+    }
+
     max-width: 640px;
     width: 100%;
 
@@ -63,10 +67,9 @@
 
         &.notification-group-wrapper {
             .notification-group-icon {
-                flex: 0 0 54px;
+                flex: 0 0 auto;
                 display: flex;
                 align-items: center;
-                justify-content: center;
 
                 .icon {
                     display: inline-flex;

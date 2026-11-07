@@ -4,7 +4,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import AppServerModule from './src/main.server';
+import bootstrap from './src/main.server';
 import { REQUEST, RESPONSE } from 'express.tokens';
 import { I18N_ASSETS_PATH } from './src/app/common/i18n-assets-path.token';
 
@@ -48,6 +48,7 @@ export function app(): express.Express {
                         imgSrc: ["'self'","data:", "blob:", cspImg],
                         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
                         scriptSrcAttr: ["'self'", "'unsafe-inline'"],
+                        workerSrc: ["'self'", "blob:"],
                         styleSrc: ["'self'", "'unsafe-inline'"],
                         manifestSrc: ["'self'"],
                         blockAllMixedContent: [],
@@ -81,20 +82,20 @@ export function app(): express.Express {
     server.set('views', browserDistFolder);
 
     // Example Express Rest API endpoints
-    // server.get('/api/**', (req, res) => { });
+    // server.get('/api/{*splat}', (req, res) => { });
     // Serve static files from /browser
-    server.get('**', express.static(browserDistFolder, {
+    server.get('/{*splat}', express.static(browserDistFolder, {
         maxAge: '1y',
         index: 'index.html',
     }));
 
     // All regular routes use the Angular engine
-    server.get('**', (req, res, next) => {
+    server.get('/{*splat}', (req, res, next) => {
         const { protocol, originalUrl, baseUrl, headers } = req;
 
         commonEngine
             .render({
-                bootstrap: AppServerModule,
+                bootstrap,
                 documentFilePath: indexHtml,
                 url: `${protocol}://${headers.host}${originalUrl}`,
                 publicPath: browserDistFolder,

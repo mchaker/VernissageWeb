@@ -1,7 +1,6 @@
 <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
     <div mat-dialog-title>
-        <mat-slide-toggle name="alwaysShowNSFW" [disabled]="switchDisabled()" [(ngModel)]="notificationsEnabled" (ngModelChange)="onNotificationsChange()">
-        </mat-slide-toggle> {{ 'dialogs.notificationSettings.texts.notificationsSettings' | translate }}
+        <mat-slide-toggle name="alwaysShowNSFW" [disabled]="switchDisabled()" [(ngModel)]="notificationsEnabled" (ngModelChange)="onNotificationsChange()" /> {{ 'dialogs.notificationSettings.texts.notificationsSettings' | translate }}
     </div>
     <div mat-dialog-content>
         @if (switchDisabled()) {
@@ -19,6 +18,12 @@
             <div>
                 <mat-checkbox name="webPushNewCommentEnabled" [disabled]="switchDisabled() || !notificationsEnabled()" [disableRipple]="true" [(ngModel)]="webPushNewCommentEnabled">
                     {{ 'dialogs.notificationSettings.texts.newCommentAdded' | translate }}
+                </mat-checkbox>
+            </div>
+
+            <div>
+                <mat-checkbox name="webPushDirectMessageEnabled" [disabled]="switchDisabled() || !notificationsEnabled()" [disableRipple]="true" [(ngModel)]="webPushDirectMessageEnabled">
+                    {{ 'dialogs.notificationSettings.texts.newDirectMessage' | translate }}
                 </mat-checkbox>
             </div>
 

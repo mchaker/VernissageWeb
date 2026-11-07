@@ -2,39 +2,61 @@
 
 <div class="flex-col gap-0 margin-top-5">
 
+    @if (photo().uploadError(); as uploadError) {
+        <div class="upload-error" role="alert">
+            <mat-icon>error</mat-icon>
+            <div class="upload-error-content">
+                <strong>{{ 'pages.upload.messages.uploadFailedTitle' | translate }}</strong>
+                <div>{{ uploadError }}</div>
+            </div>
+            @if (photo().uploadErrorDetails()) {
+                <button type="button" matButton="text" class="copy-error-details" (click)="copyUploadErrorDetails()">
+                    <mat-icon>content_copy</mat-icon>
+                    {{ 'common.actions.copyDetails' | translate }}
+                </button>
+            }
+        </div>
+    }
+
     @if (photo().photoResizedFile) {
         <div class="margin-bottom-10 width-100 text-warning fs-90">
             <strong>{{ 'components.uploadPhoto.texts.information' | translate }}</strong> {{ 'components.uploadPhoto.texts.imageExceededLimitAndWasResized' | translate: { maxFileSize: maxFileSizeString() } }}
         </div>
     }
 
-    @if (isOpenAIEnabled()) {
-        <div class="flex-row flex-space-between">
-            <div class="margin-top-10">
-                @if (photo().isUploading()) {
-                    <div class="flex-row flex-align-center gap-10">
-                        <mat-spinner class="display-inline-block margin-right-10" [diameter]="18"></mat-spinner>
-                        <div class="text-muted">{{ 'components.uploadPhoto.texts.uploading' | translate }}</div>
-                        <button type="button" matButton="text" (click)="onCancelUpload()">{{ 'common.actions.cancel' | translate }}</button>
-                    </div>
-                }
-            </div>
+    <div class="flex-row flex-space-between">
+        <div class="margin-top-10">
+            @if (photo().isUploading()) {
+                <div class="flex-row flex-align-center gap-10">
+                    <mat-spinner class="display-inline-block margin-right-10" [diameter]="18" />
+                    <div class="text-muted">{{ 'components.uploadPhoto.texts.uploading' | translate }}</div>
+                    <button type="button" matButton="text" (click)="onCancelUpload()">{{ 'common.actions.cancel' | translate }}</button>
+                </div>
+            }
+        </div>
 
+        <!-- AI features disabled.
+        @if (isOpenAIEnabled() && !preferencesService.hideAiFeatures) {
             <div class="flex-row flex-right">
                 @if (describeInProgress()) {
-                    <mat-spinner class="margin-right-10 margin-top-10" [diameter]="18"></mat-spinner>
+                    <mat-spinner class="margin-right-10 margin-top-10" [diameter]="18" />
                 }
 
                 <button matButton="outlined" (click)="onGenerateDescription()" [disabled]="!photo().isUploaded() || describeInProgress()">
                     <mat-icon>smart_toy</mat-icon> {{ 'components.uploadPhoto.texts.generate' | translate }}
                 </button>
             </div>
-        </div>
+        }
+        -->
+    </div>
 
+    <!-- AI features disabled.
+    @if (isOpenAIEnabled() && !preferencesService.hideAiFeatures) {
         <div class="text-right text-muted fs-80">
             {{ 'components.uploadPhoto.texts.featurePoweredBy' | translate: { providerName: openAIProviderName() } }}
         </div>
     }
+    -->
 
     <mat-form-field appearance="outline" class="margin-top-10 margin-bottom-10">
         <mat-label>{{ 'components.uploadPhoto.texts.altText' | translate }}</mat-label>
@@ -47,7 +69,8 @@
             #altTextInput="ngModel"
             [(ngModel)]="photo().description"
             [attr.aria-label]="'components.uploadPhoto.attrs.altText' | translate"
-        appMaxLength="2000"></textarea>
+            appMaxLength="2000">
+        </textarea>
 
         @if (altTextInput.invalid && altTextInput.errors?.appMaxLength) {
             <mat-error>{{ 'components.uploadPhoto.texts.tooLongAltText' | translate }}</mat-error>
@@ -106,7 +129,8 @@
             matInput
             [formControl]="citiesControl"
             [appAutocompleteValid]="true"
-            [matAutocomplete]="auto">
+            [matAutocomplete]="auto"
+            #cityAutocompleteTrigger="matAutocompleteTrigger">
         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayCityFn" (optionSelected)="selectedCity($event.option.value)">
             @for (option of cities$ | async; track option) {
                 <mat-option [value]="option">
@@ -116,7 +140,7 @@
         </mat-autocomplete>
 
         @if (currentCity()) {
-            <button matSuffix matIconButton [attr.aria-label]="'common.actions.clear' | translate" (click)="onCityClear()">
+            <button matSuffix matIconButton [attr.aria-label]="'common.actions.clear' | translate" (click)="onCityClear(cityAutocompleteTrigger)">
                 <mat-icon>close</mat-icon>
             </button>
         }
@@ -127,7 +151,7 @@
     </mat-form-field>-->
 
     <div class="margin-bottom-10 margin-top-20">
-        <mat-divider></mat-divider>
+        <mat-divider />
     </div>
 
     <div class="text-muted">{{ 'components.uploadPhoto.texts.exifMetadata' | translate }}</div>
@@ -143,11 +167,20 @@
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="width-100">
                     <input type="text" matInput [name]="'inputGpsLongitude' + internalIndex" [(ngModel)]="photo().longitude" [disabled]="!photo().showGpsCoordination" [attr.aria-label]="'components.uploadPhoto.attrs.gpsLongitude' | translate" />
+
+                    <mat-hint align="start">
+                        <button type="button" class="dashed gps-action" [disabled]="!photo().showGpsCoordination" [attr.tabindex]="photo().showGpsCoordination ? 0 : -1" (click)="openGeohashDialog()">{{ 'components.uploadPhoto.texts.useGeohash' | translate }}</button>
+                    </mat-hint>
+                    @if (gpsMapsUrl(); as url) {
+                        <mat-hint align="end">
+                            <a class="dashed gps-action" target="_blank" rel="noopener noreferrer" [class.disabled]="!photo().showGpsCoordination" [attr.aria-disabled]="!photo().showGpsCoordination" [attr.tabindex]="photo().showGpsCoordination ? 0 : -1" [href]="photo().showGpsCoordination ? url : null">{{ 'common.actions.open' | translate }}</a>
+                        </mat-hint>
+                    }
                 </mat-form-field>
             </div>
         </div>
 
-        <div class="margin-bottom-20 margin-left-10 width-100 text-muted fs-90">
+        <div class="margin-bottom-20 margin-left-10 padding-top-5 width-100 text-muted fs-90">
             <strong>{{ 'components.uploadPhoto.texts.warning' | translate }}</strong> {{ 'components.uploadPhoto.texts.geolocationDisclosureWarning' | translate }}
         </div>
 
@@ -174,7 +207,12 @@
                 <span class="text-muted">{{ 'components.uploadPhoto.texts.manufacturer' | translate }}</span>
             </mat-checkbox>
             <mat-form-field appearance="outline" class="flex-grow-2">
-                <input type="text" matInput [name]="'inputMake' + internalIndex" [(ngModel)]="photo().make" [disabled]="!photo().showMake" [attr.aria-label]="'components.uploadPhoto.attrs.manufacturer' | translate" />
+                <input type="text" matInput [name]="'inputMake' + internalIndex" [(ngModel)]="photo().make" (ngModelChange)="onCameraMakeChange($event)" [matAutocomplete]="autoMake" [disabled]="!photo().showMake" [attr.aria-label]="'components.uploadPhoto.attrs.manufacturer' | translate" />
+                <mat-autocomplete autoActiveFirstOption #autoMake="matAutocomplete">
+                    @for (option of cameraMakes$ | async; track option.id ?? option.name) {
+                        <mat-option [value]="option.make">{{ option.name }}</mat-option>
+                    }
+                </mat-autocomplete>
             </mat-form-field>
         </div>
 
@@ -183,7 +221,12 @@
                 <span class="text-muted">{{ 'components.uploadPhoto.texts.model' | translate }}</span>
             </mat-checkbox>
             <mat-form-field appearance="outline" class="flex-grow-2">
-                <input type="text" matInput [name]="'inputModel' + internalIndex" [(ngModel)]="photo().model" [disabled]="!photo().showModel" [attr.aria-label]="'components.uploadPhoto.attrs.model' | translate" />
+                <input type="text" matInput [name]="'inputModel' + internalIndex" [(ngModel)]="photo().model" (ngModelChange)="onCameraModelChange($event)" [matAutocomplete]="autoModel" [disabled]="!photo().showModel" [attr.aria-label]="'components.uploadPhoto.attrs.model' | translate" />
+                <mat-autocomplete autoActiveFirstOption #autoModel="matAutocomplete">
+                    @for (option of cameraModels$ | async; track option.id ?? option.name) {
+                        <mat-option [value]="option.model">{{ option.name }}</mat-option>
+                    }
+                </mat-autocomplete>
             </mat-form-field>
         </div>
 
@@ -192,7 +235,12 @@
                 <span class="text-muted">{{ 'components.uploadPhoto.texts.lens' | translate }}</span>
             </mat-checkbox>
             <mat-form-field appearance="outline" class="flex-grow-2">
-                <input type="text" matInput [name]="'inputLens' + internalIndex" [(ngModel)]="photo().lens" [disabled]="!photo().showLens" [attr.aria-label]="'components.uploadPhoto.attrs.lens' | translate" />
+                <input type="text" matInput [name]="'inputLens' + internalIndex" [(ngModel)]="photo().lens" (ngModelChange)="onLensChange($event)" [matAutocomplete]="autoLens" [disabled]="!photo().showLens" [attr.aria-label]="'components.uploadPhoto.attrs.lens' | translate" />
+                <mat-autocomplete autoActiveFirstOption #autoLens="matAutocomplete">
+                    @for (option of lenses$ | async; track option.id ?? option.name) {
+                        <mat-option [value]="option.name">{{ option.name }}</mat-option>
+                    }
+                </mat-autocomplete>
             </mat-form-field>
         </div>
 
@@ -267,7 +315,12 @@
                 <span class="text-muted">{{ 'components.uploadPhoto.texts.film' | translate }}</span>
             </mat-checkbox>
             <mat-form-field appearance="outline" class="flex-grow-2">
-                <input type="text" matInput [name]="'inputFilm' + internalIndex" [(ngModel)]="photo().film" [disabled]="!photo().showFilm" [attr.aria-label]="'components.uploadPhoto.attrs.film' | translate" />
+                <input type="text" matInput [name]="'inputFilm' + internalIndex" [(ngModel)]="photo().film" (ngModelChange)="onFilmChange($event)" [matAutocomplete]="autoFilm" [disabled]="!photo().showFilm" [attr.aria-label]="'components.uploadPhoto.attrs.film' | translate" />
+                <mat-autocomplete autoActiveFirstOption #autoFilm="matAutocomplete">
+                    @for (option of films$ | async; track option.id ?? option.name) {
+                        <mat-option [value]="option.name">{{ option.name }}</mat-option>
+                    }
+                </mat-autocomplete>
             </mat-form-field>
         </div>
 
@@ -313,7 +366,7 @@
     </div>
 
     <div class="margin-bottom-10 margin-top-20">
-        <mat-divider></mat-divider>
+        <mat-divider />
     </div>
 
     <div class="text-muted">
@@ -324,7 +377,7 @@
                 @if (photo().isHdrUploaded) {
                     <button matButton="tonal" class="small-button" (click)="onHdrDelete()">{{ 'components.uploadPhoto.texts.deleteHdrVersion' | translate }}</button>
                 } @else {
-                    <mat-spinner class="display-inline-block" [diameter]="18"></mat-spinner>
+                    <mat-spinner class="display-inline-block" [diameter]="18" />
                 }
             }
         </div>
@@ -341,13 +394,13 @@
                 @if (!photo().isUploaded()) {
                     <div class="dropzone small inactive">
                         <div class="plus">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.889 10.889H13.111V3.11097C13.111 2.4974 12.6136 2 12 2C11.3864 2 10.889 2.4974 10.889 3.11097V10.889H3.11097C2.4974 10.889 2 11.3864 2 12C2 12.6136 2.4974 13.111 3.11097 13.111H10.889V20.889C10.889 21.5026 11.3864 22 12 22C12.6136 22 13.111 21.5026 13.111 20.889V13.111H20.889C21.5026 13.111 22 12.6136 22 12C22 11.3864 21.5026 10.889 20.889 10.889Z" fill="#0870D1"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.889 10.889H13.111V3.11097C13.111 2.4974 12.6136 2 12 2C11.3864 2 10.889 2.4974 10.889 3.11097V10.889H3.11097C2.4974 10.889 2 11.3864 2 12C2 12.6136 2.4974 13.111 3.11097 13.111H10.889V20.889C10.889 21.5026 11.3864 22 12 22C12.6136 22 13.111 21.5026 13.111 20.889V13.111H20.889C21.5026 13.111 22 12.6136 22 12C22 11.3864 21.5026 10.889 20.889 10.889Z" fill="#0870D1" /></svg>
                         </div>
                     </div>
                 } @else {
                     <div class="dropzone small active" (click)="photoFileUpload.click()" (keydown.enter)="photoFileUpload.click()" tabindex="0">
                         <div class="plus">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.889 10.889H13.111V3.11097C13.111 2.4974 12.6136 2 12 2C11.3864 2 10.889 2.4974 10.889 3.11097V10.889H3.11097C2.4974 10.889 2 11.3864 2 12C2 12.6136 2.4974 13.111 3.11097 13.111H10.889V20.889C10.889 21.5026 11.3864 22 12 22C12.6136 22 13.111 21.5026 13.111 20.889V13.111H20.889C21.5026 13.111 22 12.6136 22 12C22 11.3864 21.5026 10.889 20.889 10.889Z" fill="#0870D1"></path></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.889 10.889H13.111V3.11097C13.111 2.4974 12.6136 2 12 2C11.3864 2 10.889 2.4974 10.889 3.11097V10.889H3.11097C2.4974 10.889 2 11.3864 2 12C2 12.6136 2.4974 13.111 3.11097 13.111H10.889V20.889C10.889 21.5026 11.3864 22 12 22C12.6136 22 13.111 21.5026 13.111 20.889V13.111H20.889C21.5026 13.111 22 12.6136 22 12C22 11.3864 21.5026 10.889 20.889 10.889Z" fill="#0870D1" /></svg>
                         </div>
                     </div>
                 }

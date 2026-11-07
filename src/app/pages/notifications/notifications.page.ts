@@ -10,9 +10,9 @@ import { SwPush } from '@angular/service-worker';
 import { SettingsService } from 'src/app/services/http/settings.service';
 import { NotificationSettingsDialog } from 'src/app/dialogs/notification-settings-dialog/notification-settings.dialog';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, NavigationExtras, NavigationStart, Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, NavigationStart, Router, RouterLink } from '@angular/router';
 import { RandomGeneratorService } from 'src/app/services/common/random-generator.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { delay, filter, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { Relationship } from 'src/app/models/relationship';
@@ -22,12 +22,20 @@ import { UserPayload } from 'src/app/models/user-payload';
 import { NotificationAvatarPopoverRequest } from 'src/app/models/notification-avatar-popover-request';
 import { NotificationGroupItem, NotificationItem, NotificationListItem } from 'src/app/models/notification-list-item';
 
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { AvatarComponent } from '../../components/widgets/avatar/avatar.component';
+import { PopoverComponent } from '../../components/widgets/popover/popover.component';
+import { UserPopoverComponent } from '../../components/widgets/user-popover/user-popover.component';
+import { AgoPipe } from '../../pipes/ago.pipe';
+
 @Component({
     selector: 'app-notifications',
     templateUrl: './notifications.page.html',
     styleUrls: ['./notifications.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIconButton, MatIcon, MatButton, MatCard, MatCardContent, RouterLink, AvatarComponent, PopoverComponent, UserPopoverComponent, TranslatePipe, AgoPipe]
 })
 export class NotificationsPage extends ResponsiveComponent implements OnInit, OnDestroy, AfterViewInit {
     protected readonly notificationType = NotificationType;
@@ -53,6 +61,7 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
     private routeParamsSubscription?: Subscription;
     private routeNavigationStartSubscription?: Subscription;
     private popoverSubscriptions = new Subscription();
+    private readonly maxVisibleGroupedNotifications = 10;
 
     private notificationsService = inject(NotificationsService);
     private loadingService = inject(LoadingService);
@@ -201,6 +210,15 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
         return notification.mainStatus ?? notification.status;
     }
 
+    protected getStatusQueryParams(notification: Notification): { highlight: string } | undefined {
+        const commentId = notification.status?.id;
+        if (!this.isFavouriteCommentNotification(notification) || !commentId) {
+            return undefined;
+        }
+
+        return { highlight: commentId };
+    }
+
     protected openNotificationsSettings(): void {
         this.dialog.open(NotificationSettingsDialog, {
             width: '500px'
@@ -226,7 +244,9 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
             case NotificationType.FollowRequest:
                 return this.translateService.instant('pages.notifications.types.followRequest');
             case NotificationType.Favourite:
-                if (!notification.mainStatus) {
+                if (notification.conversationId) {
+                    return this.translateService.instant('pages.notifications.types.favouriteConversationComment');
+                } else if (!notification.mainStatus) {
                     return this.translateService.instant('pages.notifications.types.favouriteStatus');
                 } else {
                     return this.translateService.instant('pages.notifications.types.favouriteComment');
@@ -239,9 +259,16 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
                 return this.translateService.instant('pages.notifications.types.adminReport');
             case NotificationType.NewComment:
                 return this.translateService.instant('pages.notifications.types.newComment');
+            case NotificationType.DirectMessage:
+                return this.translateService.instant('pages.notifications.types.directMessage');
             default:
                 return '';
         }
+    }
+
+    protected isConversationNotification(notification: Notification): boolean {
+        return notification.notificationType === NotificationType.DirectMessage
+            || (notification.notificationType === NotificationType.Favourite && !!notification.conversationId);
     }
 
     protected getNotificationIcon(notification: Notification): string {
@@ -266,6 +293,8 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
                 return 'report_problem';
             case NotificationType.NewComment:
                 return 'chat_bubble';
+            case NotificationType.DirectMessage:
+                return 'forum';
             default:
                 return '';
         }
@@ -293,6 +322,8 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
                 return 'admin-report';
             case NotificationType.NewComment:
                 return 'new-comments';
+            case NotificationType.DirectMessage:
+                return 'direct-message';
             default:
                 return '';
         }
@@ -365,8 +396,8 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
             id: `group:${notifications.map(notification => this.getNotificationUniquenessKey(notification)).join('|')}`,
             notifications,
             representative,
-            visibleNotifications: notifications.slice(0, 7),
-            hiddenNotificationsCount: Math.max(0, notifications.length - 7),
+            visibleNotifications: notifications.slice(0, this.maxVisibleGroupedNotifications),
+            hiddenNotificationsCount: Math.max(0, notifications.length - this.maxVisibleGroupedNotifications),
             latestCreatedAt: this.getLatestCreatedAt(notifications),
             linkedStatus: this.getLinkedStatus(representative)
         };
@@ -378,7 +409,8 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
                 return notification.notificationType;
             case NotificationType.Favourite:
             case NotificationType.Reblog: {
-                const linkedStatusId = this.getLinkedStatus(notification)?.id;
+                if (this.isConversationNotification(notification)) return undefined;
+                const linkedStatusId = this.getNotificationSubjectStatusId(notification);
 
                 if (!linkedStatusId) {
                     return undefined;
@@ -389,6 +421,20 @@ export class NotificationsPage extends ResponsiveComponent implements OnInit, On
             default:
                 return undefined;
         }
+    }
+
+    private getNotificationSubjectStatusId(notification: Notification): string | undefined {
+        if (this.isFavouriteCommentNotification(notification)) {
+            return notification.status?.id;
+        }
+
+        return this.getLinkedStatus(notification)?.id;
+    }
+
+    private isFavouriteCommentNotification(notification: Notification): boolean {
+        return notification.notificationType === NotificationType.Favourite
+            && !!notification.mainStatus
+            && !!notification.status?.id;
     }
 
     private getNotificationUniquenessKey(notification: Notification): string {

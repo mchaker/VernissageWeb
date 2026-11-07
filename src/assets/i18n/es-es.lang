@@ -1,7 +1,7 @@
 {
   "common": {
     "actions": {
-      "addField": "Agregar campo",
+      "addField": "Añadir campo",
       "approve": "Aprobar",
       "assignRoles": "Asignar roles",
       "back": "Atrás",
@@ -11,6 +11,7 @@
       "clear": "Borrar",
       "close": "Cerrar",
       "copy": "Copiar",
+      "copyDetails": "Copiar detalles",
       "delete": "Eliminar",
       "disable": "Deshabilitar",
       "dismiss": "Descartar",
@@ -18,17 +19,17 @@
       "edit": "Editar",
       "enable": "Habilitar",
       "follow": "Seguir",
-      "forgotPassword": "¿Contraseña olvidada?",
+      "forgotPassword": "¿Olvidaste la contraseña?",
       "import": "Importar",
       "loadMore": "Cargar más",
       "loadMoreEllipsis": "Cargar más...",
       "login": "Iniciar sesión",
       "next": "Siguiente",
       "ok": "OK",
-      "open": "Abierto",
+      "open": "Abrir",
       "openProfileWithUserName": "Abrir perfil @{userName}",
       "refresh": "Recargar",
-      "register": "Registrar",
+      "register": "Registrarse",
       "reject": "Rechazar",
       "reload": "Recargar",
       "remove": "Eliminar",
@@ -41,11 +42,15 @@
       "show": "Mostrar",
       "signOut": "Cerrar sesión",
       "signUp": "Registro",
+      "suppress": "Silenciar",
+      "suppressed": "Silenciado",
       "tryAgain": "otra vez",
       "unblock": "Desbloquear",
       "unfollow": "Dejar de seguir",
+      "unsuppress": "Dejar de silenciar",
       "update": "Actualizar",
-      "upload": "Subir"
+      "upload": "Subir",
+      "toTheTop": "Volver arriba"
     },
     "articleVisibility": {
       "homeSignIn": "Inicio - iniciar sesión",
@@ -143,11 +148,12 @@
       "website": "Sitio web"
     },
     "messages": {
-      "newVersionAvailable": "Está disponible una nueva versión de Vernissage. Actualice la página para obtener la última versión.",
+      "newVersionAvailable": "Hay una nueva versión de Vernissage. Por favor, recargue la página para usar la última versión.",
       "unknownError": "Error desconocido.",
       "unrecoverableState": "Se produjo un error y no se puede recuperar el estado de la aplicación. Por favor, recarga la página."
     },
     "pageTitles": {
+      "directMessages": "Mensajes privados",
       "accessForbidden": "Vernissage - Acceso prohibido",
       "account": "Vernissage - Cuenta",
       "activityPubEventRecipients": "Vernissage - Destinatarios del evento ActivityPub",
@@ -155,6 +161,10 @@
       "articles": "Vernissage - Artículos",
       "bookmarks": "Vernissage - Marcadores",
       "categories": "Vernissage - Categorías",
+      "cameras": "Vernissage - Cámaras",
+      "explore": "Vernissage - Explorar",
+      "films": "Vernissage - Películas",
+      "lenses": "Vernissage - Lentes",
       "confirmEmail": "Vernissage - Confirmar correo electrónico",
       "connectionLost": "Vernissage - Conexión perdida",
       "createArticle": "Vernissage - Crear artículo",
@@ -233,7 +243,7 @@
     },
     "categoryGallery": {
       "texts": {
-        "sadlyThereSNothingToSeeHere": "Lamentablemente, todavía no hay nada que ver aquí."
+        "sadlyThereSNothingToSeeHere": "Qué pena, aún no hay nada que ver aquí."
       }
     },
     "categoryList": {
@@ -241,10 +251,12 @@
         "categoryHasBeenDeleted": "La categoría ha sido eliminada.",
         "categoryHasBeenDisabled": "La categoría ha sido deshabilitada.",
         "categoryHasBeenEnabled": "La categoría ha sido habilitada.",
-        "doYouWantToDeleteCategory": "¿Quieres eliminar categoría?"
+        "doYouWantToDeleteCategory": "¿Quieres eliminar la categoría?"
       },
       "texts": {
-        "categoryName": "Nombre de categoría",
+        "alwaysRecalculateRemoteStatusCategory": "Recalcular siempre la categoría de los estados remotos",
+        "alwaysRecalculateRemoteStatusCategoryDescription": "Cuando esta opción está activada, las categorías de los estados de ActivityPub entrantes se recalculan según las reglas locales de categorías de hashtags. Si no se encuentra ninguna regla coincidente, se utiliza la categoría proporcionada por el servidor remoto.",
+        "categoryName": "Nombre de la categoría",
         "newCategory": "Nueva categoría"
       }
     },
@@ -284,13 +296,14 @@
     },
     "followButtons": {
       "actions": {
+        "directMessage": "Mensaje privado",
         "approveFollow": "Aprobar seguimiento",
         "blockDomain": "Bloquear dominio",
         "blockUser": "Bloquear usuario",
         "cancelRequest": "Cancelar solicitud",
         "copyProfileLink": "Copiar enlace al perfil",
         "feature": "Característica",
-        "followBack": "Volver atrás",
+        "followBack": "Seguir también",
         "mute": "Silenciar",
         "openOriginalProfile": "Abrir perfil original",
         "rejectFollow": "Rechazar seguimiento",
@@ -497,6 +510,9 @@
         "isRegistrationOpened": "La inscripción está abierta",
         "isWebPushEnabled": "Las notificaciones WebPush están habilitadas",
         "showCategoriesForAnonymous": "Mostrar categorías para usuarios anónimos",
+        "showCamerasForAnonymous": "Mostrar cámaras para usuarios anónimos",
+        "showLensesForAnonymous": "Mostrar lentes para usuarios anónimos",
+        "showFilmsForAnonymous": "Mostrar películas para usuarios anónimos",
         "showEditorsStatusesChoiceForAnonymous": "Mostrar la opción de estado del editor para usuarios anónimos",
         "showEditorsUsersChoiceForAnonymous": "Mostrar la elección de los usuarios del editor para usuarios anónimos",
         "showHashtagsForAnonymous": "Mostrar etiquetas para usuarios anónimos",
@@ -516,9 +532,10 @@
       "applicationLogo": "Logotipo de la aplicación",
       "menuWithActions": "Menú con acciones",
       "navigation": {
+        "directMessages": "Mensajes privados",
         "account": "Cuenta",
         "articles": "Artículos",
-        "categories": "Categorías",
+        "explore": "Explorar",
         "editorsChoice": "Elección del editor",
         "errors": "Errores",
         "events": "Eventos",
@@ -702,6 +719,7 @@
         "software": "Software:",
         "tooLongAltText": "Texto alternativo demasiado largo.",
         "uploading": "Subiendo...",
+        "useGeohash": "Usar Geohash",
         "warning": "Advertencia:",
         "withoutALicense": "Sin licencia"
       }
@@ -719,6 +737,44 @@
     }
   },
   "dialogs": {
+    "preserveContentCredentials": {
+      "originalTitle": "Upload the original photo?",
+      "originalPrompt": "Would you like to upload “{fileName}” in its original form? All metadata will be preserved, including EXIF location data if present.",
+      "originalBenefits": "The original file preserves the exact image data, color profile and detail, which can matter for photography such as astrophotography.",
+      "standardProcessing": "Choose No to remove metadata and re-export the photo as JPEG. C2PA Content Credentials, if present, will not be preserved.",
+      "title": "Preserve C2PA Content Credentials?",
+      "detected": "The file “{fileName}” contains C2PA Content Credentials.",
+      "metadata": "To preserve these credentials, the original file must be stored and distributed with all of its embedded metadata, including location data if present.",
+      "privacy": "Continue only if you are sure the file contains no information you wish to keep private or that could put your privacy at risk. This original file, including all metadata, will be sent to your followers’ servers.",
+      "no": "No",
+      "yes": "Yes, I’m sure"
+    },
+    "contentCredentials": {
+      "labels": {
+        "actions": "Actions",
+        "format": "Format",
+        "ingredients": "Ingredients",
+        "producedWith": "Produced with",
+        "signedAt": "Signed at",
+        "signedBy": "Signed by",
+        "title": "Title",
+        "identity": "Identity",
+        "actionsCount": "Actions count",
+        "verify": "Verify",
+        "appOrDeviceUsed": "App or device used"
+      },
+      "texts": {
+        "verifiedSummary": "The image contains a valid C2PA manifest and passed client-side validation.",
+        "validationCaution": "This does not necessarily mean the image was forged. Re-exporting or processing the image on another server can also break validation.",
+        "validationErrors": "Validation error details",
+        "signatureMismatch": "The C2PA signature is invalid.",
+        "hashMismatch": "The hash of the image or an ingredient does not match the C2PA manifest."
+      },
+      "title": "Content Credentials",
+      "actions": {
+        "openOnVerifySite": "Open on Verify Site"
+      }
+    },
     "category": {
       "attrs": {
         "categoryName": "Nombre de categoría",
@@ -853,6 +909,15 @@
         "requestSent": "Solicitud enviada"
       }
     },
+    "geohash": {
+      "texts": {
+        "enterGeohash": "Introduce el geohash",
+        "geohash": "Geohash",
+        "geohashIsNotValid": "El geohash no es válido",
+        "latitude": "Latitud",
+        "longitude": "Longitud"
+      }
+    },
     "homeCard": {
       "attrs": {
         "homeCardTitle": "Título de la tarjeta de inicio",
@@ -949,11 +1014,11 @@
       "texts": {
         "muteAccount": "Silenciar cuenta",
         "muteDialogHeader": "Las publicaciones y los impulsos silenciados no aparecerán en la mayoría de las líneas de tiempo del sistema.",
-        "muteEndDate": "Silenciar fecha de finalización",
+        "muteEndDate": "Fecha de fin del silencio",
         "muteNewStatuses": "Silenciar nuevos estados",
         "muteNotifications": "Silenciar notificaciones",
         "muteReblogs": "Silenciar republicaciones",
-        "optionalDateWhenMutingWillEnd": "Fecha opcional en la que finalizará el silenciamiento.",
+        "optionalDateWhenMutingWillEnd": "Fecha opcional en la que finalizará el silencio.",
         "removeUsersReblogsFromYourTimeline": "Eliminar las republicaciones del usuario de tu línea de tiempo",
         "removeUsersStatusesFromYourTimeline": "Eliminar los estados del usuario de tu línea de tiempo"
       }
@@ -967,6 +1032,7 @@
         "webPushPublicKeyIsNotSet": "La clave pública de Web Push no está configurada."
       },
       "texts": {
+        "newDirectMessage": "Nuevo mensaje privado",
         "boostedStatus": "Estado impulsado",
         "newCommentAdded": "Nuevo comentario añadido",
         "newFollowRequest": "Nueva solicitud de seguimiento",
@@ -1490,6 +1556,40 @@
     }
   },
   "pages": {
+    "directMessages": {
+      "emailVerificationRequired": "Verifica tu dirección de correo electrónico antes de enviar un mensaje.",
+      "like": "Me gusta este mensaje",
+      "unlike": "Quitar Me gusta del mensaje",
+      "liked": "Mensaje con Me gusta",
+      "deleteMessage": "Eliminar mensaje",
+      "confirmDelete": "¿Seguro que quieres eliminar este mensaje?",
+      "deletedMessage": "El usuario ha eliminado este mensaje.",
+      "privacyNotice": "Los mensajes privados no están cifrados de extremo a extremo. No compartas información confidencial.",
+      "title": "Mensajes privados",
+      "subtitle": "Conversaciones privadas en el fediverso.",
+      "newMessage": "Nuevo mensaje",
+      "conversations": "Conversaciones",
+      "searchConversations": "Buscar conversaciones",
+      "image": "Imagen",
+      "unread": "Mensajes sin leer",
+      "loadError": "No se pudieron cargar los mensajes. Inténtalo de nuevo.",
+      "noResults": "No hay conversaciones que coincidan.",
+      "noConversations": "Todavía no hay conversaciones.",
+      "removeRecipient": "Eliminar destinatario",
+      "participants": "{count, plural, one {# participante} other {# participantes}}",
+      "searchUser": "Buscar un destinatario",
+      "add": "Añadir",
+      "mute": "Silenciar conversación",
+      "unmute": "Dejar de silenciar la conversación",
+      "history": "Historial de mensajes",
+      "olderMessages": "Cargar mensajes anteriores",
+      "chooseRecipients": "Busca un usuario y pulsa Añadir para iniciar una conversación.",
+      "removeImage": "Eliminar imagen",
+      "writeMessage": "Escribe un mensaje...",
+      "addImage": "Añadir imagen",
+      "selectConversation": "Selecciona una conversación o empieza un mensaje nuevo.",
+      "invalidImage": "Elige una imagen en un formato compatible que no supere el límite de tamaño del servidor."
+    },
     "account": {
       "avatar": {
         "removeAriaLabel": "Eliminar avatar",
@@ -1812,9 +1912,22 @@
     "bookmarks": {
       "title": "Marcadores"
     },
-    "categories": {
-      "subtitle": "Una lista de categorías en el servidor junto con las fotos asignadas a ellas.",
-      "title": "Categorías"
+    "explore": {
+      "searchCriteria": "Criterios de búsqueda",
+      "subtitles": {
+        "cameras": "Explora fotos agrupadas por las cámaras con las que fueron tomadas.",
+        "categories": "Explora fotos agrupadas por las categorías disponibles en este servidor.",
+        "films": "Explora fotos agrupadas por las películas utilizadas para tomarlas.",
+        "lenses": "Explora fotos agrupadas por las lentes utilizadas para tomarlas."
+      },
+      "tabAriaLabel": "Tipo de exploración",
+      "tabs": {
+        "cameras": "Cámaras",
+        "categories": "Categorías",
+        "films": "Películas",
+        "lenses": "Lentes"
+      },
+      "title": "Explorar"
     },
     "confirmEmail": {
       "error": {
@@ -1981,7 +2094,7 @@
         "description": "Sí.Vernissageofrece una amplia navegación con teclado para que los usuarios puedan moverse rápidamente entre páginas, líneas de tiempo y acciones.",
         "footer": "Estos atajos están diseñados para mejorar la accesibilidad y acelerar la navegación, lo que resulta especialmente útil para los usuarios centrados en el teclado.",
         "globalShortcuts": {
-          "categories": "Ver categorías",
+          "explore": "Abrir Explorar",
           "editorsChoice": "Abre la línea de tiempo de Elección del editor",
           "faq": "Abre esta página de preguntas frecuentes",
           "home": "Ir a la línea de tiempo de Inicio",
@@ -1994,8 +2107,10 @@
         "statusDetailShortcuts": {
           "bookmark": "Guardar el estado en favoritos",
           "boost": "Impulsar el estado",
+          "closePhotoPreview": "Cerrar vista previa de la foto",
           "like": "Como el estado",
           "nextStatus": "Ver el siguiente estado",
+          "openPhotoPreview": "Abrir vista previa de la foto",
           "previousStatus": "Ver el estado anterior"
         },
         "statusDetailShortcutsTitle": "En una Página de Detalles de Estado:",
@@ -2083,6 +2198,7 @@
     },
     "notifications": {
       "actions": {
+        "openConversation": "Abrir conversación",
         "openUserProfileAriaLabel": "Abrir perfil de usuario",
         "refreshCurrentTimelineAriaLabel": "Actualizar línea de tiempo actual"
       },
@@ -2093,13 +2209,15 @@
       "types": {
         "adminReport": "ha sido reportado",
         "adminSignUp": "es un nuevo usuario",
+        "directMessage": "te ha enviado un mensaje privado",
         "favouriteComment": "favorito tu comentario",
-        "favouriteStatus": "favoritos tu foto",
+        "favouriteConversationComment": "ha indicado que le gusta tu comentario en una conversación",
+        "favouriteStatus": "les gustó tu foto",
         "follow": "te ha seguido",
         "followRequest": "quiere seguirte",
         "mention": "te mencioné",
         "newComment": "escribió un nuevo comentario",
-        "reblog": "Mejoró tu foto",
+        "reblog": "impulsaron tu foto",
         "status": "foto publicada",
         "update": "foto editada"
       }
@@ -2118,6 +2236,10 @@
         "title": "Galería de perfil del usuario"
       },
       "media": {
+        "alwaysAskToUploadOriginalImage": {
+          "title": "Always ask about uploading the original photo",
+          "description": "Before each upload, choose whether to remove metadata and re-export the photo as JPEG, or preserve the original file with all metadata, including EXIF location data if present."
+        },
         "alwaysShowNsfw": {
           "description": "Fuerza la visualización de todos los medios NSFW (sensibles) sin advertencias.",
           "title": "Mostrar siempre NSFW"
@@ -2129,6 +2251,10 @@
         "autoScrollGalleryImages": {
           "description": "Pasa automáticamente por las imágenes de estado cada 6 segundos.",
           "title": "Desplazamiento automático de imágenes en la galería de estado"
+        },
+        "hideAiFeatures": {
+          "description": "Oculta los botones de IA y sus notas al añadir fotos.",
+          "title": "Ocultar funciones de IA"
         },
         "showAlternativeText": {
           "description": "Muestra texto alternativo si está presente en la pantalla de detalles del estado.",
@@ -2171,6 +2297,10 @@
       "actions": {
         "profileQrCodeAriaLabel": "Código QR de perfil",
         "shareBusinessCardAriaLabel": "Compartir tarjeta de visita"
+      },
+      "accountModeration": {
+        "blocked": "Esta cuenta ha sido bloqueada por un moderador del servidor. No puede seguir ni ser seguida por cuentas de este servidor, y sus publicaciones no se muestran aquí.",
+        "suppressed": "Esta cuenta ha sido silenciada por un moderador del servidor. Todavía puede seguir y ser seguida por cuentas de este servidor, pero las fotos nuevas que publique no aparecerán en ningún lugar del sitio."
       },
       "confirmations": {
         "createBusinessCard": "Aún no has creado una tarjeta de presentación. ¿Quieres crearlo ahora?"
@@ -2223,6 +2353,7 @@
         "emailRequired": "Introduce el correo electrónico.",
         "emailTaken": "Elige otro correo electrónico, este ya está conectado a una cuenta diferente.",
         "invalidCaptchaCode": "El código captcha no es válido. Por favor inténtalo de nuevo.",
+        "registrationIsDisabled": "El registro sin un código de invitación o un motivo para registrarse está deshabilitado.",
         "invitationCodeRequired": "Introduce el código de invitación.",
         "invitationCodeTooLong": "El código de invitación es demasiado largo.",
         "invitationTokenInvalid": "El token de invitación no es válido.",
@@ -2338,6 +2469,7 @@
         "users": "No se encontraron usuarios."
       },
       "hint": "Busca un usuario, estado o etiqueta, o pega una URL en un estado o perfil de usuario.",
+      "showOnlyMyStatuses": "Mostrar solo mis estados",
       "tabs": {
         "hashtags": "Etiquetas",
         "statuses": "Estados",
@@ -2431,6 +2563,23 @@
       },
       "confirmations": {
         "changeStatusWithEnteredComment": "Has introducido un comentario. ¿Quieres cambiar el estado de todos modos?"
+      },
+      "contentCredentials": {
+        "label": "Content Credentials",
+        "verified": "Content Credentials verified",
+        "title": "Content Credentials",
+        "author": "Author",
+        "equipmentOrApplication": "Equipment/Application",
+        "details": "Details",
+        "appOrDeviceUsed": "App or device used",
+        "aiGenerated": "AI Generated",
+        "validation": {
+          "verified": "C2PA integrity and signature trust verified",
+          "untrusted": "Integrity verified. Certificate issuer not verified",
+          "invalid": "C2PA integrity verification failed",
+          "unknown": "C2PA verification result is unavailable"
+        },
+        "unverifiedMetadata": "The author, device and image history shown below are unverified."
       },
       "followedTagsInThisStatus": "Etiquetas seguidas en este estado",
       "hashtagsAriaLabel": "Etiquetas",
@@ -2598,6 +2747,8 @@
         "tooManyFilesSelectedSingular": "Demasiados archivos seleccionados. Puedes agregar una imagen más.",
         "tooManyFilesSelectedPlural": "Demasiados archivos seleccionados. Puedes agregar {count} imágenes más.",
         "unableToResize": "No se puede cambiar el tamaño de la imagen antes de cargarla.",
+        "uploadFailed": "Esta imagen no se pudo subir. Comprueba tu conexión e inténtalo de nuevo.",
+        "uploadFailedTitle": "Fallo subiendo imagen",
         "unsupportedFileType": "Este tipo de archivo no es compatible. Carga una imagen JPG, PNG o WEBP.",
         "verifyEmailBeforePublish": "Para publicar un estado, primero verifica tu dirección de correo electrónico."
       },
@@ -2639,7 +2790,8 @@
       },
       "filters": {
         "onlyBlocked": "Sólo bloqueado",
-        "onlyLocal": "Sólo locales"
+        "onlyLocal": "Sólo locales",
+        "onlySuppressed": "Sólo silenciados"
       },
       "messages": {
         "accountApproved": "La cuenta ha sido aprobada.",
@@ -2650,6 +2802,8 @@
         "accountMarkedAsSupporter": "La cuenta ha sido marcada como colaboradora.",
         "accountRefreshed": "La cuenta ha sido actualizada.",
         "accountRejected": "La cuenta ha sido rechazada.",
+        "accountSuppressed": "El usuario ha sido silenciado.",
+        "accountUnsuppressed": "El usuario ha dejado de estar silenciado.",
         "twoFactorDisabled": "2FA ha sido deshabilitado.",
         "userBlocked": "El usuario ha sido bloqueado.",
         "userUnblocked": "El usuario ha sido desbloqueado."

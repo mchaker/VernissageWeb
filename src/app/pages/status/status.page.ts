@@ -3,7 +3,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { decode } from 'blurhash';
 import { combineLatest, firstValueFrom, map, Subscription } from 'rxjs';
 import { StatusesService } from 'src/app/services/http/statuses.service';
-import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router, RouterLink } from '@angular/router';
 import { Status } from 'src/app/models/status';
 import { Exif } from 'src/app/models/exif';
 import { Location } from 'src/app/models/location';
@@ -16,7 +16,7 @@ import { ReportDialog } from 'src/app/dialogs/report-dialog/report.dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportData } from 'src/app/dialogs/report-dialog/report-data';
 import { ReportsService } from 'src/app/services/http/reports.service';
-import { Gallery, GalleryItem, ImageItem } from 'ng-gallery';
+import { Gallery, GalleryItem, ImageItem, GalleryComponent } from 'ng-gallery';
 import { Lightbox } from 'ng-gallery/lightbox';
 import { ContextStatusesService } from 'src/app/services/common/context-statuses.service';
 import { Role } from 'src/app/models/role';
@@ -27,7 +27,7 @@ import { UsersDialogContext, UsersListType } from 'src/app/dialogs/users-dialog/
 import { License } from 'src/app/models/license';
 import { WindowService } from 'src/app/services/common/window.service';
 import { RoutingStateService } from 'src/app/services/common/routing-state.service';
-import { isPlatformBrowser, Location as NgLocation } from '@angular/common';
+import { isPlatformBrowser, Location as NgLocation, SlicePipe } from '@angular/common';
 import { Meta, SafeHtml, Title } from '@angular/platform-browser';
 import { LoadingService } from 'src/app/services/common/loading.service';
 import { DeviceDetectorService } from 'ngx-device-detector';
@@ -39,14 +39,37 @@ import { UserPayload } from 'src/app/models/user-payload';
 import { ConfirmationDialog } from 'src/app/dialogs/confirmation-dialog/confirmation.dialog';
 import { CommentReplyComponent } from 'src/app/components/widgets/comment-reply/comment-reply.component';
 import { StatusHashtagsService } from 'src/app/services/common/status-hashtags.service';
-import { TranslateService } from '@ngx-translate/core';
+import { C2paContentCredentials } from 'src/app/models/c2pa-content-credentials';
+import { C2paService } from 'src/app/services/common/c2pa.service';
+import { ContentCredentialsDialog } from 'src/app/dialogs/content-credentials-dialog/content-credentials.dialog';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/list';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MiniUserCardComponent } from '../../components/widgets/mini-user-card/mini-user-card.component';
+import { UserCardComponent } from '../../components/widgets/user-card/user-card.component';
+import { HrefToRouterLinkDirective } from '../../directives/href-to-router-link.directive';
+import { NoteProcessorDirective } from '../../directives/note-processor.directive';
+import { TagComponent } from '../../components/widgets/tag/tag.component';
+import { StatusPropertiesComponent } from '../../components/widgets/status-properties/status-properties.component';
+import { CommentReplyComponent as CommentReplyComponent_1 } from '../../components/widgets/comment-reply/comment-reply.component';
+import { AvatarComponent } from '../../components/widgets/avatar/avatar.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect, MatOption } from '@angular/material/select';
+import { AgoPipe } from '../../pipes/ago.pipe';
+import { LocalizedDatePipe } from '../../pipes/localized-date.pipe';
+import { ViewportObserverDirective } from '../../directives/viewport-observer.directive';
 
 @Component({
     selector: 'app-status',
     templateUrl: './status.page.html',
     styleUrls: ['./status.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIcon, MatButton, GalleryComponent, MatCard, MatCardContent, MatIconButton, MatTooltip, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider, MatProgressSpinner, MiniUserCardComponent, UserCardComponent, HrefToRouterLinkDirective, NoteProcessorDirective, TagComponent, StatusPropertiesComponent, MatCardHeader, MatCardTitle, CommentReplyComponent_1, RouterLink, AvatarComponent, MatFormField, MatLabel, MatSelect, MatOption, SlicePipe, TranslatePipe, AgoPipe, LocalizedDatePipe, MatCardActions, ViewportObserverDirective]
 })
 export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy {
     protected readonly avatarSize = AvatarSize;
@@ -70,9 +93,15 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     protected autoScrollGalleryImages = signal(true);
     protected imageWidth = signal(32);
     protected imageHeight = signal(32);
+    protected imageAspectRatio = computed(() => this.imageWidth() / this.imageHeight());
+    protected imageWidthAtMaxHeight = computed(() => `${600 * this.imageAspectRatio()}px`);
     protected isLoggedIn = signal(false);
     protected rendered = signal<SafeHtml>('');
     protected hasHdrSupport = signal(false);
+
+    protected contentCredentials = signal<C2paContentCredentials | undefined>(undefined);
+    protected pendingHighlightedCommentId = signal<string | undefined>(undefined);
+    protected highlightedCommentId = signal<string | undefined>(undefined);
 
     protected versionId = model<string>('');
     protected versions = signal<Status[]>([]);
@@ -100,6 +129,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private commentReplies = viewChildren(CommentReplyComponent);
     private routeParamsSubscription?: Subscription;
     private routeNavigationEndSubscription?: Subscription;
+    private commentHighlightEndTimeout?: ReturnType<typeof setTimeout>;
     private readonly oneSecond = 1000;
     private readonly maxImagesInComments = 4;
     private imageIndexForOpenGraph = 0;
@@ -109,6 +139,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private mainGalleryId = 'mainGalleryId';
     private commentGalleryId = 'commentGalleryId';
     private blurhash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+    private contentCredentialsRequestId = 0;
 
     private document = inject(DOCUMENT);
     private platformId = inject(PLATFORM_ID);
@@ -134,6 +165,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private focusTrackerService = inject(FocusTrackerService);
     private statusHashtagsService = inject(StatusHashtagsService);
     private translateService = inject(TranslateService);
+    private c2paService = inject(C2paService);
 
     constructor() {
         super();
@@ -157,7 +189,10 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
             .subscribe(async params => {
                 const statusId = params.routeParams['id'] as string;
                 const requestedPhotoIndex = this.getPhotoIndexFromQuery(params.queryParams.get('photo'));
+                const highlightedCommentId = params.queryParams.get('highlight');
                 const contextStatusIndex = this.getContextStatusIndexFromState();
+
+                this.clearCommentHighlight();
 
                 if (params.queryParams.has('version')) {
                     const internalVersionId = params.queryParams.get('version');
@@ -179,20 +214,26 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
                 // Load status information.
                 await this.loadPageData(statusId, requestedPhotoIndex);
 
+                const images = this.images() ?? [];
+
                 // Load images to gallery (and reset gallery state).
                 const mainGallery = this.gallery.ref(this.mainGalleryId);
-                mainGallery.load(this.images() ?? []);
-                mainGallery.set(0);
+                mainGallery.load(images);
 
                 // Load images to popup gallery.
                 const popupGallery = this.gallery.ref(this.popupGalleryId);
-                popupGallery.load(this.images() ?? []);
-                popupGallery.set(0);
+                popupGallery.load(images);
+
+                if (images.length > 0) {
+                    mainGallery.set(0);
+                    popupGallery.set(0);
+                }
 
                 this.setNoIndexMeta();
 
                 this.loadingService.hideLoader();
                 this.isReady.set(true);
+                this.queueCommentHighlight(highlightedCommentId);
 
                 if (!this.firstCanvasInitialization) {
                     setTimeout(() => {
@@ -206,6 +247,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         super.ngOnDestroy();
 
         this.clearNoIndexMeta();
+        this.clearCommentHighlight();
         this.routeParamsSubscription?.unsubscribe();
         this.routeNavigationEndSubscription?.unsubscribe();
     }
@@ -255,6 +297,9 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
                 break;
             case 's':
                 this.toggleBookmark();
+                break;
+            case 'o':
+                this.openInFullScreen();
                 break;
         }
     }
@@ -337,6 +382,19 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
     protected onImageIndexChange(event: any): void {
         this.currentIndex.set(event.currIndex);
+        void this.loadContentCredentialsForCurrentImage();
+    }
+
+    protected openContentCredentialsDialog(): void {
+        const internalContentCredentials = this.contentCredentials();
+        if (!internalContentCredentials) {
+            return;
+        }
+
+        this.dialog.open(ContentCredentialsDialog, {
+            width: '520px',
+            data: internalContentCredentials
+        });
     }
 
     protected async onReportDialog(reportedStatus: Status): Promise<void> {
@@ -414,7 +472,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
     protected async onBoostedByDialog(): Promise<void> {
         const internalMainStatus = this.mainStatus();
-        if (!internalMainStatus?.id) {
+        if (!this.isLoggedIn() || this.isInVersionMode() || !internalMainStatus?.id) {
             return;
         }
 
@@ -426,13 +484,24 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
     protected async onFavouritedByDialog(): Promise<void> {
         const internalMainStatus = this.mainStatus();
-        if (!internalMainStatus?.id) {
+        if (!this.isLoggedIn() || this.isInVersionMode() || !internalMainStatus?.id) {
             return;
         }
 
         this.dialog.open(UsersDialog, {
             width: '500px',
             data: new UsersDialogContext(internalMainStatus.id, UsersListType.favourited, this.translateService.instant('pages.status.menu.favouritedBy'))
+        });
+    }
+
+    protected onCommentFavouritedByDialog(status: Status): void {
+        if (!this.isLoggedIn() || this.isInVersionMode() || !status.id) {
+            return;
+        }
+
+        this.dialog.open(UsersDialog, {
+            width: '500px',
+            data: new UsersDialogContext(status.id, UsersListType.favourited, this.translateService.instant('pages.status.menu.favouritedBy'))
         });
     }
 
@@ -748,6 +817,22 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         }
     }
 
+    protected onCommentViewportChange(commentId: string, isVisible: boolean): void {
+        if (!isVisible || this.pendingHighlightedCommentId() !== commentId) {
+            return;
+        }
+
+        this.pendingHighlightedCommentId.set(undefined);
+        this.highlightedCommentId.set(commentId);
+
+        clearTimeout(this.commentHighlightEndTimeout);
+        this.commentHighlightEndTimeout = setTimeout(() => {
+            if (this.highlightedCommentId() === commentId) {
+                this.highlightedCommentId.set(undefined);
+            }
+        }, 5000);
+    }
+
     protected getCleanFocalLength(focalLength: string): string {
         const withoutMillimeters = focalLength.replace('mm', '').trim();
         return withoutMillimeters.split(/\.|,/)[0];
@@ -868,6 +953,23 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         return undefined;
     }
 
+    private async loadContentCredentialsForCurrentImage(): Promise<void> {
+        const requestId = ++this.contentCredentialsRequestId;
+        const attachment = this.mainStatus()?.attachments?.at(this.currentIndex());
+
+        this.contentCredentials.set(undefined);
+        const imageUrl = attachment?.originalHdrFile?.url && !this.preferencesService.alwaysShowSdrPhoto && this.browserSupportsHdr()
+            ? attachment.originalHdrFile.url
+            : attachment?.originalFile?.url;
+        const internalContentCredentials = await this.c2paService.getContentCredentials(imageUrl);
+
+        if (requestId !== this.contentCredentialsRequestId) {
+            return;
+        }
+
+        this.contentCredentials.set(internalContentCredentials);
+    }
+
     private getMapsUrl(index: number): string | undefined {
         const locationInternal = this.getLocation(index);
         if (locationInternal) {
@@ -974,6 +1076,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         // Set main status data.
         this.status.set(downloadedStatus);
         this.replyStatus.set(undefined);
+        this.contentCredentials.set(undefined);
 
         // Calculate main status (for reblogs).
         const internalMainStatus = downloadedStatus.reblog ? downloadedStatus.reblog : downloadedStatus;
@@ -1016,6 +1119,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
         this.images.set(internalImages);
         this.rendered.set(this.mainStatus()?.noteHtml ?? '');
+        void this.loadContentCredentialsForCurrentImage();
 
         // Load status histories asynchronously.
         this.loadStatusHistories(statusId);
@@ -1250,6 +1354,21 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         }
 
         return photoNumber - 1;
+    }
+
+    private queueCommentHighlight(commentId: string | null): void {
+        if (!this.isBrowser() || !commentId || !this.comments()?.some(comment => comment.status.id === commentId)) {
+            return;
+        }
+
+        this.pendingHighlightedCommentId.set(commentId);
+    }
+
+    private clearCommentHighlight(): void {
+        clearTimeout(this.commentHighlightEndTimeout);
+        this.commentHighlightEndTimeout = undefined;
+        this.pendingHighlightedCommentId.set(undefined);
+        this.highlightedCommentId.set(undefined);
     }
 
     private getContextStatusIndexFromState(): number | undefined {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal, DOCUMENT } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, NavigationStart } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, NavigationStart, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { AuthorizationService } from 'src/app/services/authorization/authorization.service';
@@ -27,14 +27,25 @@ import { ConfirmationDialog } from 'src/app/dialogs/confirmation-dialog/confirma
 import { UserType } from 'src/app/models/user-type';
 import { Role } from 'src/app/models/role';
 import { UserPayload } from 'src/app/models/user-payload';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { NgOptimizedImage } from '@angular/common';
+import { MatChip } from '@angular/material/chips';
+import { MatIcon } from '@angular/material/icon';
+import { FollowButtonsSectionComponent } from '../../components/widgets/follow-buttons-section/follow-buttons-section.component';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatDivider } from '@angular/material/list';
+import { UsersCardComponent } from '../../components/widgets/users-card/users-card.component';
+import { GalleryComponent } from '../../components/widgets/gallery/gallery.component';
+import { LocalizedDatePipe } from '../../pipes/localized-date.pipe';
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.page.html',
     styleUrls: ['./profile.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgOptimizedImage, MatChip, MatIcon, FollowButtonsSectionComponent, MatButton, RouterLink, MatTooltip, MatCard, MatCardContent, MatDivider, UsersCardComponent, GalleryComponent, TranslatePipe, LocalizedDatePipe]
 })
 export class ProfilePage extends ReusableGalleryPageComponent implements OnInit, OnDestroy {
     protected readonly profilePageTab = ProfilePageTab;
@@ -140,6 +151,7 @@ export class ProfilePage extends ReusableGalleryPageComponent implements OnInit,
             const downloadedLatestFollowers = await this.usersService.followers(this.userName, undefined, undefined, undefined, 10);
             this.latestFollowers.set(downloadedLatestFollowers);
 
+            this.clearUserLink();
             downloadUser.fields?.forEach(field => {
                 if (field.value) {
                     const loweCasedValue = field.value.toLowerCase();
@@ -166,7 +178,7 @@ export class ProfilePage extends ReusableGalleryPageComponent implements OnInit,
         super.ngOnDestroy();
 
         this.clearCardMetaTags();
-        this.removeUserLink();
+        this.clearUserLink();
         this.removeFeedLinks();
         this.clearNoIndexMeta();
 
@@ -373,25 +385,17 @@ export class ProfilePage extends ReusableGalleryPageComponent implements OnInit,
     }
 
     private createLink(url: string): void {
-        const userLinkMe = this.document.querySelector('link[id="userLinkMe"]');
+        const link: HTMLLinkElement = this.document.createElement('link');
+        link.setAttribute('href', url);
+        link.setAttribute('rel', 'me');
+        link.setAttribute('name', 'userLinkMe');
 
-        if (userLinkMe) {
-            userLinkMe.setAttribute('href', url);
-        } else {
-            const link: HTMLLinkElement = this.document.createElement('link');
-            link.setAttribute('href', url);
-            link.setAttribute('rel', 'me');
-            link.setAttribute('id', 'userLinkMe');
-
-            this.document.head.appendChild(link);
-        }
+        this.document.head.appendChild(link);
     }
 
-    private removeUserLink(): void {
-        const userLinkMe = this.document.querySelector('link[id="userLinkMe"]');
-        if (userLinkMe) {
-            this.document.head.removeChild(userLinkMe);
-        }
+    private clearUserLink(): void {
+        const userLinksMe = this.document.querySelectorAll('link[name="userLinkMe"]');
+        userLinksMe.forEach(userLinkMe => userLinkMe.remove());
     }
 
     private setCardMetaTags(): void {

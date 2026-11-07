@@ -1,18 +1,27 @@
 import { ChangeDetectionStrategy, Component, inject, model, OnInit, Renderer2, signal } from '@angular/core';
 import { ResponsiveComponent } from 'src/app/common/responsive';
 import { PreferencesService } from 'src/app/services/common/preferences.service';
+import { SettingsService } from 'src/app/services/http/settings.service';
 import { RouteReuseStrategy } from '@angular/router';
 import { CustomReuseStrategy } from 'src/app/common/custom-reuse-strategy';
+
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { MatDivider } from '@angular/material/list';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-preferences',
     templateUrl: './preferences.page.html',
     styleUrls: ['./preferences.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatCard, MatCardContent, MatRadioGroup, FormsModule, MatRadioButton, MatDivider, MatSlideToggle, TranslatePipe]
 })
 export class PreferencesPage extends ResponsiveComponent implements OnInit {
     protected isReady = signal(false);
+    protected isOpenAIEnabled = signal(false);
 
     protected isLightTheme = model(true);
     protected isCircleAvatar = model(true);
@@ -26,14 +35,18 @@ export class PreferencesPage extends ResponsiveComponent implements OnInit {
     protected showAltIcon = model(false);
     protected alwaysShowSdrPhoto = model(false);
     protected autoScrollGalleryImages = model(false);
+    protected hideAiFeatures = model(false);
+    protected alwaysAskToUploadOriginalImage = model(false);
 
     private preferencesService = inject(PreferencesService);
+    private settingsService = inject(SettingsService);
     private routeReuseStrategy = inject(RouteReuseStrategy);
     private renderer = inject(Renderer2);
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
 
+        this.isOpenAIEnabled.set(this.settingsService.publicSettings?.isOpenAIEnabled ?? false);
         this.isLightTheme.set(this.preferencesService.isLightTheme);
         this.isCircleAvatar.set(this.preferencesService.isCircleAvatar);
         this.isSquareImages.set(this.preferencesService.isSquareImages);
@@ -46,6 +59,8 @@ export class PreferencesPage extends ResponsiveComponent implements OnInit {
         this.showAltIcon.set(this.preferencesService.showAltIcon);
         this.alwaysShowSdrPhoto.set(this.preferencesService.alwaysShowSdrPhoto);
         this.autoScrollGalleryImages.set(this.preferencesService.autoScrollGalleryImages);
+        this.hideAiFeatures.set(this.preferencesService.hideAiFeatures);
+        this.alwaysAskToUploadOriginalImage.set(this.preferencesService.alwaysAskToUploadOriginalImage);
 
         this.isReady.set(true);
     }
@@ -103,6 +118,14 @@ export class PreferencesPage extends ResponsiveComponent implements OnInit {
 
     protected onAutoScrollGalleryImagesChange(): void {
         this.preferencesService.autoScrollGalleryImages = this.autoScrollGalleryImages();
+    }
+
+    protected onHideAiFeaturesChange(): void {
+        this.preferencesService.hideAiFeatures = this.hideAiFeatures();
+    }
+
+    protected onAlwaysAskToUploadOriginalImageChange(): void {
+        this.preferencesService.alwaysAskToUploadOriginalImage = this.alwaysAskToUploadOriginalImage();
     }
 
     private clearReuseStrategyState(): void {

@@ -6,18 +6,33 @@ import { ResponsiveComponent } from 'src/app/common/responsive';
 import { Article } from 'src/app/models/article';
 import { ArticleFileInfo } from 'src/app/models/article-file-info';
 import { ArticleVisibility } from 'src/app/models/article-visibility';
+import { Role } from 'src/app/models/role';
+import { ForbiddenError } from 'src/app/errors/forbidden-error';
+import { AuthorizationService } from 'src/app/services/authorization/authorization.service';
 import { FileSizeService } from 'src/app/services/common/file-size.service';
 import { LoadingService } from 'src/app/services/common/loading.service';
 import { MessagesService } from 'src/app/services/common/messages.service';
 import { ArticlesService } from 'src/app/services/http/articles.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+
+import { FormsModule } from '@angular/forms';
+import { MatCard, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { InputActivityDirective } from '../../directives/input-activity.directive';
+import { MatInput } from '@angular/material/input';
+import { MaxLengthValidatorDirective } from '../../validators/directives/max-length-validator.directive';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { LanguageSelectComponent } from '../../components/widgets/language-select/language-select.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-article-edit',
     templateUrl: './article-edit.page.html',
     styleUrls: ['./article-edit.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [FormsModule, MatCard, MatCardContent, MatFormField, MatLabel, InputActivityDirective, MatInput, MaxLengthValidatorDirective, MatError, CdkTextareaAutosize, MatHint, LanguageSelectComponent, MatCheckbox, MatButton, MatIcon, MatCardActions, TranslatePipe]
 })
 export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDestroy {
     protected isReady = signal(false);
@@ -39,6 +54,7 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
     private routeParamsSubscription?: Subscription;
 
     private messageService = inject(MessagesService);
+    private authorizationService = inject(AuthorizationService);
     private articlesService = inject(ArticlesService);
     private activatedRoute = inject(ActivatedRoute);
     private loadingService = inject(LoadingService);
@@ -49,6 +65,11 @@ export class ArticleEditPage extends ResponsiveComponent implements OnInit, OnDe
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
+
+        if (!this.authorizationService.hasRole(Role.Administrator) && !this.authorizationService.hasRole(Role.Moderator)) {
+            throw new ForbiddenError();
+        }
+
         this.maxArticleFileSizeString.set(this.fileSizeService.getHumanFileSize(this.defaultArticleMaxFileSize, 0));
 
         this.routeParamsSubscription = this.activatedRoute.params.subscribe(async params => {

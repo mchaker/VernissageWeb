@@ -10,14 +10,30 @@ import { MessagesService } from 'src/app/services/common/messages.service';
 import { Router } from '@angular/router';
 import { Rule } from 'src/app/models/rule';
 import { SettingsService } from 'src/app/services/http/settings.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { InputActivityDirective } from '../../directives/input-activity.directive';
+import { MatInput } from '@angular/material/input';
+import { UniqueUserNameValidatorDirective } from '../../validators/directives/unique-user-name-validator.directive';
+import { MaxLengthValidatorDirective } from '../../validators/directives/max-length-validator.directive';
+import { UniqueEmailValidatorDirective } from '../../validators/directives/unique-email-validator.directive';
+import { LanguageSelectComponent } from '../../components/widgets/language-select/language-select.component';
+import { PasswordComponent } from '../../components/widgets/password/password.component';
+import { MatDivider } from '@angular/material/list';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { FooterComponent } from '../../components/core/footer/footer.component';
 
 @Component({
     selector: 'app-register',
     templateUrl: './register.page.html',
     styleUrls: ['./register.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [FormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, InputActivityDirective, MatInput, UniqueUserNameValidatorDirective, MaxLengthValidatorDirective, MatError, UniqueEmailValidatorDirective, LanguageSelectComponent, PasswordComponent, MatDivider, MatCheckbox, CdkTextareaAutosize, MatButton, MatCardActions, MatProgressSpinner, FooterComponent, TranslatePipe]
 })
 export class RegisterPage implements OnInit {
     protected readonly registerMode = RegisterMode;
@@ -106,25 +122,35 @@ export class RegisterPage implements OnInit {
             this.messageService.showSuccess(this.translateService.instant('pages.register.messages.accountCreated'));
             await this.router.navigate(['/login']);
         } catch (error: any) {
-            if (error.error.code === 'userNameIsAlreadyTaken') {
+            const code = error?.error?.code;
+
+            if (code === 'userNameIsAlreadyTaken') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.userNameAlreadyTaken'));
-            } else if (error.error.code === 'emailIsAlreadyConnected') {
+            } else if (code === 'emailIsAlreadyConnected') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.emailAlreadyConnected'));
-            } else if (error.error.code === 'invitationTokenIsInvalid') {
+            } else if (code === 'invitationTokenIsInvalid') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.invitationTokenInvalid'));
-            } else if (error.error.code === 'invitationTokenHasBeenUsed') {
+            } else if (code === 'invitationTokenHasBeenUsed') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.invitationTokenUsed'));
-            } else if (error.error.code === 'userHaveToAcceptAgreement') {
+            } else if (code === 'userHaveToAcceptAgreement') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.mustAcceptRules'));
-            } else if (error.error.code === 'disposableEmailCannotBeUsed') {
+            } else if (code === 'disposableEmailCannotBeUsed') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.disposableEmailNotAllowed'));
-            } else if (error.error.code === 'securityTokenIsInvalid') {
+            } else if (code === 'securityTokenIsInvalid') {
                 this.errorMessage.set(this.translateService.instant('pages.register.errors.invalidCaptchaCode'));
+            } else if (code === 'registrationIsDisabled') {
+                this.errorMessage.set(this.translateService.instant('pages.register.errors.registrationIsDisabled'));
             } else {
-                this.errorMessage.set(this.translateService.instant('pages.register.errors.unexpectedError'));
+                this.errorMessage.set(undefined);
+                const serverErrorMessage = this.messageService.getServerErrorMessage(error);
+                const unknownErrorMessage = this.translateService.instant('common.messages.unknownError');
+                const toastMessage = serverErrorMessage && serverErrorMessage !== unknownErrorMessage
+                    ? serverErrorMessage
+                    : this.translateService.instant('pages.register.errors.unexpectedError');
+                this.messageService.showError(toastMessage, error);
             }
 
-            this.registerPageMode.set(RegisterMode.Error);
+            this.registerPageMode.set(this.errorMessage() ? RegisterMode.Error : RegisterMode.Register);
         }
     }
 

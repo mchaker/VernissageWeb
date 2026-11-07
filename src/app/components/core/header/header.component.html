@@ -1,7 +1,7 @@
 <nav>
     <mat-toolbar>
         @if (deviceResolution() === resolution.handsetPortrait) {
-            @if (showTrending() || showEditorsChoice() || showCategories()) {
+            @if (showTrending() || showEditorsChoice() || showExplore()) {
                 <button matIconButton [matMenuTriggerFor]="discover" class="hamburger-menu" [attr.aria-label]="'common.labels.moreOptions' | translate">
                     <mat-icon>menu</mat-icon>
                 </button>
@@ -20,10 +20,10 @@
                         </a>
                     }
 
-                    @if (showCategories()) {
-                        <a mat-menu-item [routerLink]="['/categories']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.categories' | translate">
-                            <mat-icon>loyalty</mat-icon>
-                            <span>{{ 'components.header.navigation.categories' | translate }}</span>
+                    @if (showExplore()) {
+                        <a mat-menu-item [routerLink]="['/explore']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.explore' | translate">
+                            <mat-icon>explore</mat-icon>
+                            <span>{{ 'components.header.navigation.explore' | translate }}</span>
                         </a>
                     }
 
@@ -35,7 +35,7 @@
                     }
 
                     @if (user() && isLoggedIn()) {
-                        <mat-divider></mat-divider>
+                        <mat-divider />
 
                         <a mat-menu-item [routerLink]="['/upload']" [attr.aria-label]="'common.actions.upload' | translate">
                             <mat-icon>arrow_upward</mat-icon>
@@ -69,9 +69,9 @@
                     </a>
                 }
 
-                @if (showCategories()) {
-                    <a matIconButton [routerLink]="['/categories']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.categories' | translate">
-                        <mat-icon>loyalty</mat-icon>
+                @if (showExplore()) {
+                    <a matIconButton [routerLink]="['/explore']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.explore' | translate">
+                        <mat-icon>explore</mat-icon>
                     </a>
                 }
 
@@ -95,15 +95,15 @@
                     </a>
                 }
 
-                @if (showCategories()) {
-                    <a matButton="text" [routerLink]="['/categories']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.categories' | translate" class="margin-right-5">
-                        <mat-icon>loyalty</mat-icon> {{ 'components.header.navigation.categories' | translate }}
+                @if (showExplore()) {
+                    <a matButton="text" [routerLink]="['/explore']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.explore' | translate" class="margin-right-5">
+                        <mat-icon>explore</mat-icon> {{ 'components.header.navigation.explore' | translate }}
                     </a>
                 }
 
                 @if (showNews()) {
                     <a matButton="text" [routerLink]="['/news']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.news' | translate" class="margin-right-5">
-                        <mat-icon>news</mat-icon> {{ 'components.header.navigation.news' | translate }}
+                        <mat-icon class="news-icon" [class.news-icon-unread]="articleCounter() > 0">news</mat-icon> {{ 'components.header.navigation.news' | translate }}
                     </a>
                 }
             }
@@ -174,8 +174,14 @@
         @if (user(); as userObject) {
             @if (isLoggedIn()) {
                 @if (deviceResolution() !== resolution.handsetPortrait) {
-                    <mat-divider class="menu-divider" [vertical]="true"></mat-divider>
+                    <mat-divider class="menu-divider" [vertical]="true" />
+                }
 
+                <a matIconButton [routerLink]="['/direct-messages']" [attr.aria-label]="'components.header.navigation.directMessages' | translate">
+                    <mat-icon>forum</mat-icon>
+                </a>
+
+                @if (deviceResolution() !== resolution.handsetPortrait) {
                     <a matIconButton [routerLink]="['/search']" [attr.aria-label]="'common.actions.search' | translate">
                         <mat-icon>search</mat-icon>
                     </a>
@@ -203,7 +209,7 @@
                             <mat-icon>face</mat-icon>
                             <span>{{ fullName() }}</span>
                         </a>
-                        <mat-divider></mat-divider>
+                        <mat-divider />
                         <a mat-menu-item [routerLink]="['/']" (click)="markClearReuseStrategy()" [attr.aria-label]="'components.header.navigation.home' | translate">
                             <mat-icon>home</mat-icon>
                             <span>{{ 'components.header.navigation.home' | translate }}</span>
@@ -223,7 +229,7 @@
                             </a>
                         }
 
-                        <mat-divider></mat-divider>
+                        <mat-divider />
                         <a mat-menu-item [routerLink]="['/account']" [attr.aria-label]="'components.header.navigation.account' | translate">
                             <mat-icon>account_circle</mat-icon>
                             <span>{{ 'components.header.navigation.account' | translate }}</span>
@@ -238,7 +244,7 @@
                         </a>
 
                         @if (isAdministrator() || isModerator()) {
-                            <mat-divider></mat-divider>
+                            <mat-divider />
 
                             <a mat-menu-item [routerLink]="['/users']" [attr.aria-label]="'components.header.navigation.users' | translate">
                                 <mat-icon>people</mat-icon>
@@ -269,7 +275,7 @@
                             </a>
                         }
 
-                        <mat-divider></mat-divider>
+                        <mat-divider />
                         <button mat-menu-item (click)="signOut()" [attr.aria-label]="'common.actions.signOut' | translate">
                             <mat-icon>exit_to_app</mat-icon>
                             <span>{{ 'common.actions.signOut' | translate }}</span>

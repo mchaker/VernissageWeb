@@ -7,7 +7,7 @@
         @if (!isDuringRelationshipAction()) {
             @if (showChangeRelationshipButton()) {
                 @if (showFollowButton()) {
-                    <button animate.enter="fade-in" type="button" (click)="onFollow()" matButton="filled" [attr.aria-label]="'common.actions.follow' | translate">{{ updatedRelationship().followedBy ? ('components.followButtons.actions.followBack' | translate) : ('common.actions.follow' | translate) }}</button>
+                    <button animate.enter="fade-in" type="button" (click)="onFollow()" matButton="filled" [disabled]="updatedUser().isBlocked === true" [attr.aria-label]="'common.actions.follow' | translate">{{ updatedRelationship().followedBy ? ('components.followButtons.actions.followBack' | translate) : ('common.actions.follow' | translate) }}</button>
                 } @else {
                     <button animate.enter="fade-in" type="button" (click)="onUnfollow()" matButton="tonal" [attr.aria-label]="'common.actions.unfollow' | translate">{{ updatedRelationship().following ? ('common.actions.unfollow' | translate) : ('components.followButtons.actions.cancelRequest' | translate) }}</button>
                 }
@@ -19,11 +19,15 @@
             }
         }
 
-        @if (showOpenOriginalProfileButton() || showCopyProfileUrlButton() || showMuteButton() || showUnmuteButton() || showFeatureButton() || showUnfeatureButton() || showReportButton()) {
+        @if (showDirectMessage() || showOpenOriginalProfileButton() || showCopyProfileUrlButton() || showMuteButton() || showUnmuteButton() || showFeatureButton() || showUnfeatureButton() || showReportButton()) {
             <button class="more-button" matButton="outlined" [matMenuTriggerFor]="dropdownMenuOne2" [attr.aria-label]="'common.labels.moreOptions' | translate">
                 <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #dropdownMenuOne2="matMenu" xPosition="before">
+                @if (showDirectMessage()) {
+                    <a mat-menu-item [routerLink]="['/direct-messages']" [queryParams]="{ recipientId: updatedUser().id }"><mat-icon>forum</mat-icon> {{ 'components.followButtons.actions.directMessage' | translate }}</a>
+                    <mat-divider />
+                }
                 @if (showOpenOriginalProfileButton()) {
                     <button (click)="onOriginalProfile()" mat-menu-item><mat-icon>public</mat-icon> {{ 'components.followButtons.actions.openOriginalProfile' | translate }}</button>
                 }
@@ -33,7 +37,7 @@
                 }
 
                 @if (showOpenOriginalProfileButton() || showCopyProfileUrlButton()) {
-                    <mat-divider></mat-divider>
+                    <mat-divider />
                 }
                 
                 @if (showFeatureButton()) {
@@ -49,12 +53,12 @@
                 }
 
                 @if (showMuteButton()) {
-                    <mat-divider></mat-divider>
+                    <mat-divider />
                     <button (click)="openMuteAccountDialog()" mat-menu-item><mat-icon>voice_over_off</mat-icon> {{ 'components.followButtons.actions.mute' | translate }}</button>
                 }
                 
                 @if (showUnmuteButton()) {
-                    <mat-divider></mat-divider>
+                    <mat-divider />
                     <button (click)="unmuteAccount()" mat-menu-item><mat-icon>record_voice_over</mat-icon> {{ 'components.followButtons.actions.unmute' | translate }}</button>
                 }
 
@@ -82,7 +86,7 @@
     <mat-button-toggle-group [hideSingleSelectionIndicator]="true" (change)="toggleChange($event)">
         @if (showChangeRelationshipButton()) {
             @if (showFollowButton()) {
-                <mat-button-toggle (click)="onFollow()">{{ updatedRelationship().followedBy ? ('components.followButtons.actions.followBack' | translate) : ('common.actions.follow' | translate) }}</mat-button-toggle>
+                <mat-button-toggle (click)="onFollow()" [disabled]="updatedUser().isBlocked === true">{{ updatedRelationship().followedBy ? ('components.followButtons.actions.followBack' | translate) : ('common.actions.follow' | translate) }}</mat-button-toggle>
             } @else {
                 <mat-button-toggle (click)="onUnfollow()">{{ updatedRelationship().following ? ('common.actions.unfollow' | translate) : ('components.followButtons.actions.cancelRequest' | translate) }}</mat-button-toggle>
             }

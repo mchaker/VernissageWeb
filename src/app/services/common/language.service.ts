@@ -38,6 +38,7 @@ export class LanguageService {
 
     private preferencesService = inject(PreferencesService);
     private translateService = inject(TranslateService);
+    private dateAdapter = inject(DateAdapter<Date>);
 
     async initializeLanguage(): Promise<void> {
         await this.setLanguage(this.defaultLanguage, false);

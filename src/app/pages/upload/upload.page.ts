@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, model, OnInit, signal, viewChild } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { C2paService } from 'src/app/services/common/c2pa.service';
+import { PreserveContentCredentialsDialog } from 'src/app/dialogs/preserve-content-credentials-dialog/preserve-content-credentials.dialog';
+import { PreserveContentCredentialsDialogData } from 'src/app/models/preserve-content-credentials-dialog-data';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { encode } from 'blurhash';
 import * as ExifReader from 'exifreader';
 import { StatusRequest } from 'src/app/models/status-request';
@@ -9,6 +13,7 @@ import { StatusVisibility } from 'src/app/models/status-visibility';
 import { TemporaryAttachment } from 'src/app/models/temporary-attachment';
 import { UploadPhoto } from 'src/app/models/upload-photo';
 import { MessagesService } from 'src/app/services/common/messages.service';
+import { PreferencesService } from 'src/app/services/common/preferences.service';
 import { AttachmentsService } from 'src/app/services/http/attachments.service';
 import { StatusesService } from 'src/app/services/http/statuses.service';
 import { CategoriesService } from 'src/app/services/http/categories.service';
@@ -19,7 +24,7 @@ import { LicensesService } from 'src/app/services/http/licenses.service';
 import { InstanceService } from 'src/app/services/http/instance.service';
 import { SettingsService } from 'src/app/services/http/settings.service';
 import { RandomGeneratorService } from 'src/app/services/common/random-generator.service';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
 import { WindowService } from 'src/app/services/common/window.service';
 import { StatusTextDialog } from 'src/app/dialogs/status-text-template-dialog/status-text-template.dialog';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,7 +37,22 @@ import { AuthorizationService } from 'src/app/services/authorization/authorizati
 import { ForbiddenError } from 'src/app/errors/forbidden-error';
 import { CanonExifService } from 'src/app/services/common/canon-exif.service';
 import { DeviceDetectorService, DeviceType } from 'ngx-device-detector';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatStepper, MatStep, MatStepLabel, MatStepperPrevious, MatStepperNext } from '@angular/material/stepper';
+import { UploadPhotoComponent } from '../../components/widgets/upload-photo/upload-photo.component';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { StatusTextAutocompleteComponent } from '../../components/widgets/status-text-autocomplete/status-text-autocomplete.component';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatSelect, MatOption } from '@angular/material/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { InputActivityDirective } from '../../directives/input-activity.directive';
+import { MatInput } from '@angular/material/input';
 
 import { HostListener } from '@angular/core';
 
@@ -41,10 +61,11 @@ import { HostListener } from '@angular/core';
     templateUrl: './upload.page.html',
     styleUrls: ['./upload.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [CdkDropList, CdkDrag, RouterLink, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatStepper, MatStep, MatStepLabel, UploadPhotoComponent, MatButton, MatStepperPrevious, MatStepperNext, MatProgressSpinner, FormsModule, MatIcon, MatTooltip, StatusTextAutocompleteComponent, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatCheckbox, InputActivityDirective, MatInput, TranslatePipe]
 })
 export class UploadPage extends ResponsiveComponent implements OnInit {
     protected readonly statusVisibility = StatusVisibility;
+    protected preferencesService = inject(PreferencesService);
 
     protected photos = signal<UploadPhoto[]>([]);
     protected categories = signal<Category[]>([]);
@@ -58,6 +79,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     protected contentWarning = model('');
     protected selectedIndex = model(0);
     protected isCanceling = signal(false);
+    protected isSubmitting = signal(false);
+    protected isPhotoDragOver = signal(false);
     protected emailHasBeenVerified = signal(false);
     protected accountHasBeenMoved = signal(false);
 
@@ -100,6 +123,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     private loadingService = inject(LoadingService);
     private authorizationService = inject(AuthorizationService);
     private canonExifService = inject(CanonExifService);
+    private c2paService = inject(C2paService);
     private deviceDetectorService = inject(DeviceDetectorService);
     private translateService = inject(TranslateService);
 
@@ -140,6 +164,39 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         const input = event.target as HTMLInputElement | null;
         const files = input?.files ? Array.from(input.files) : [];
 
+        await this.processSelectedPhotos(files);
+    }
+
+    protected onPhotoDragOver(event: DragEvent): void {
+        if (!event.dataTransfer?.types.includes('Files')) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = 'copy';
+        this.isPhotoDragOver.set(true);
+    }
+
+    protected onPhotoDragLeave(event: DragEvent): void {
+        const dropzone = event.currentTarget as HTMLElement;
+        if (event.relatedTarget && dropzone.contains(event.relatedTarget as Node)) {
+            return;
+        }
+
+        this.isPhotoDragOver.set(false);
+    }
+
+    protected async onPhotoDrop(event: DragEvent): Promise<void> {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isPhotoDragOver.set(false);
+
+        const files = event.dataTransfer?.files ? Array.from(event.dataTransfer.files) : [];
+        await this.processSelectedPhotos(files);
+    }
+
+    private async processSelectedPhotos(files: File[]): Promise<void> {
         if (files.length === 0) {
             return;
         }
@@ -186,8 +243,18 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         const uploadPhoto = new UploadPhoto(photoUuid);
         uploadPhoto.photoFile = file;
 
+        const hasContentCredentials = await this.c2paService.hasContentCredentials(file);
+        if (hasContentCredentials || this.preferencesService.alwaysAskToUploadOriginalImage) {
+            const dialogRef = this.dialog.open<PreserveContentCredentialsDialog, PreserveContentCredentialsDialogData, boolean>(PreserveContentCredentialsDialog, {
+                width: '560px',
+                data: { fileName: file.name, hasContentCredentials },
+                autoFocus: '[data-decline]'
+            });
+            uploadPhoto.useOriginalImage = await firstValueFrom(dialogRef.afterClosed()) === true;
+        }
+
         if (file.size > this.maxFileSize) {
-            if (this.deviceDetectorService.deviceType() !== DeviceType.Mobile) {
+            if (uploadPhoto.useOriginalImage || this.deviceDetectorService.deviceType() !== DeviceType.Mobile) {
                 this.messageService.showError(this.translateService.instant('pages.upload.messages.fileTooLarge', { maxFileSize: this.maxFileSizeString() }));
                 return;
             }
@@ -241,10 +308,10 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
     protected async onPhotoDelete(photo: UploadPhoto): Promise<void> {
         try {
-            if (!this.isEditMode()) {
-                photo.isDeleting.set(true);
+            photo.isDeleting.set(true);
+
+            if (!this.isEditMode() && photo.isUploaded() && photo.id) {
                 await this.attachmentsService.deleteAttachment(photo.id);
-                photo.isDeleting.set(false);
             }
 
             this.photos.update(photos => photos.filter(x => x !== photo));
@@ -252,6 +319,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             console.error(error);
             this.messageService.showServerError(error);
         } finally {
+            photo.isDeleting.set(false);
             this.hashtagsInProgress.set(false);
         }
     }
@@ -313,6 +381,10 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     }
 
     protected async onSubmit(): Promise<void> {
+        if (this.isSubmitting()) {
+            return;
+        }
+
         if (!this.emailHasBeenVerified()) {
             this.messageService.showError(this.translateService.instant('pages.upload.messages.verifyEmailBeforePublish'));
             return;
@@ -323,6 +395,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             return;
         }
 
+        this.isSubmitting.set(true);
         try {
             const internalPhotos = this.photos();
 
@@ -431,6 +504,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         } catch (error) {
             console.error(error);
             this.messageService.showServerError(error);
+        } finally {
+            this.isSubmitting.set(false);
         }
     }
 
@@ -487,12 +562,24 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             const photoSrc = reader.result as string;
             uploadPhoto.photoSrc.set(photoSrc);
 
-            const blurhash = await this.encodeImageToBlurhash(photoSrc);
-            uploadPhoto.blurhash = blurhash;
+            try {
+                const blurhash = await this.encodeImageToBlurhash(photoSrc);
+                uploadPhoto.blurhash = blurhash;
+            } catch (error) {
+                // A preview or blurhash failure must not prevent the original file from being uploaded.
+                console.warn('Unable to generate a blurhash for the selected image.', error);
+            }
         }
 
+        reader.onerror = () => console.warn('Unable to create a preview for the selected image.', reader.error);
+        reader.onabort = () => console.warn('Creating a preview for the selected image was aborted.');
+
         if (uploadPhoto.photoFile) {
-            reader.readAsDataURL(uploadPhoto.photoFile);
+            try {
+                reader.readAsDataURL(uploadPhoto.photoFile);
+            } catch (error) {
+                console.warn('Unable to create a preview for the selected image.', error);
+            }
         }
     }
 
@@ -501,10 +588,13 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             this.photos.update(photos => [...photos, uploadPhoto]);
 
             const formData = new FormData();
-            const fileToUpload = uploadPhoto.photoResizedFile ?? uploadPhoto.photoFile;
+            const fileToUpload = uploadPhoto.useOriginalImage ? uploadPhoto.photoFile : uploadPhoto.photoResizedFile ?? uploadPhoto.photoFile;
 
             if (fileToUpload) {
                 formData.append('file', fileToUpload);
+            }
+            if (uploadPhoto.useOriginalImage) {
+                formData.append('useOriginalImage', 'true');
             }
 
             // Reset file form (in case if we want to send the same file once again).
@@ -514,11 +604,12 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
             uploadPhoto.isUploading.set(true);
             uploadPhoto.uploadProgress.set(0);
-            uploadPhoto.uploadSubscription = this.attachmentsService.uploadAttachmentWithProgress(formData).subscribe({
+            uploadPhoto.uploadError.set(undefined);
+            uploadPhoto.uploadErrorDetails.set(undefined);
+            const uploadSubscription = this.attachmentsService.uploadAttachmentWithProgress(formData).subscribe({
                 next: (event) => {
-                    // Upload progress is working only when we delete withFetch() from HttpClient configuration.
-                    // However, it's strongly recommended to enable fetch for applications that use Server-Side
-                    // Rendering for better performance and compatibility (https://angular.dev/api/common/http/provideHttpClient).
+                    // The default Fetch backend does not emit upload progress events. The progress is set to 100%
+                    // after receiving the response below.
                     if (event.type === HttpEventType.UploadProgress) {
                         const total = event.total ?? fileToUpload?.size ?? 0;
                         if (total > 0) {
@@ -528,7 +619,8 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
 
                     if (event.type === HttpEventType.Response) {
                         const temporaryAttachment = event.body;
-                        if (!temporaryAttachment) {
+                        if (!temporaryAttachment?.id) {
+                            this.handlePhotoUploadError(uploadPhoto, new Error('The attachment upload response did not contain an attachment.'));
                             return;
                         }
 
@@ -549,27 +641,63 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                     }
                 },
                 error: (error) => {
-                    console.error(error);
-                    this.messageService.showServerError(error);
-                    uploadPhoto.isUploading.set(false);
-                    uploadPhoto.uploadProgress.set(0);
-
-                    uploadPhoto.uploadSubscription?.unsubscribe();
-                    uploadPhoto.uploadSubscription = undefined;
+                    this.handlePhotoUploadError(uploadPhoto, error);
+                },
+                complete: () => {
+                    if (!uploadPhoto.isUploaded() && !uploadPhoto.uploadError()) {
+                        this.handlePhotoUploadError(uploadPhoto, new Error('The attachment upload ended before an attachment was returned.'));
+                    }
                 }
             });
+
+            uploadPhoto.uploadSubscription = uploadSubscription;
+            if (!uploadPhoto.isUploading()) {
+                uploadSubscription.unsubscribe();
+                uploadPhoto.uploadSubscription = undefined;
+            }
         } catch (error) {
-            console.error(error);
-            this.messageService.showServerError(error);
+            this.handlePhotoUploadError(uploadPhoto, error);
         }
+    }
+
+    private handlePhotoUploadError(uploadPhoto: UploadPhoto, error: unknown): void {
+        console.error(error);
+
+        const serverErrorMessage = this.messageService.getServerErrorMessage(error);
+        const unknownErrorMessage = this.translateService.instant('common.messages.unknownError');
+        const uploadErrorMessage = serverErrorMessage && serverErrorMessage !== unknownErrorMessage
+            ? serverErrorMessage
+            : this.translateService.instant('pages.upload.messages.uploadFailed');
+        const uploadErrorDetails = this.messageService.getErrorDetails(error);
+
+        uploadPhoto.isUploading.set(false);
+        uploadPhoto.uploadProgress.set(0);
+        uploadPhoto.uploadError.set(uploadErrorMessage);
+        uploadPhoto.uploadErrorDetails.set(uploadErrorDetails);
+
+        uploadPhoto.uploadSubscription?.unsubscribe();
+        uploadPhoto.uploadSubscription = undefined;
+
+        this.messageService.showError(uploadErrorMessage, error, uploadErrorDetails);
     }
 
     private readExifMetadataAndUpload(uploadPhoto: UploadPhoto): void {
         const bufferReader = new FileReader();
+        let uploadStarted = false;
+
+        const startUpload = () => {
+            if (uploadStarted) {
+                return;
+            }
+
+            uploadStarted = true;
+            this.uploadPhoto(uploadPhoto);
+        };
 
         bufferReader.addEventListener('load', () => {
-            // First we can read exif metadata from the file.
-            const tags = ExifReader.load(bufferReader.result as ArrayBuffer);
+            try {
+                // First we can read exif metadata from the file.
+                const tags = ExifReader.load(bufferReader.result as ArrayBuffer);
 
             const caption = tags['Caption/Abstract']?.description.toString();
             if (caption) {
@@ -727,12 +855,29 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
                 uploadPhoto.showGpsCoordination = false;
                 }*/
 
-            // After reading exif metadata from file, we can upload file to the server.
-            this.uploadPhoto(uploadPhoto);
-        });
+            } catch (error) {
+                // EXIF is optional. Malformed or browser-specific metadata parsing must not block upload.
+                console.warn('Unable to read EXIF metadata from the selected image.', error);
+            } finally {
+                startUpload();
+            }
+        }, { once: true });
+
+        const uploadWithoutExif = () => {
+            console.warn('Unable to read the selected image for EXIF metadata.', bufferReader.error);
+            startUpload();
+        };
+
+        bufferReader.addEventListener('error', uploadWithoutExif, { once: true });
+        bufferReader.addEventListener('abort', uploadWithoutExif, { once: true });
 
         if (uploadPhoto.photoFile) {
-            bufferReader.readAsArrayBuffer(uploadPhoto.photoFile);
+            try {
+                bufferReader.readAsArrayBuffer(uploadPhoto.photoFile);
+            } catch (error) {
+                console.warn('Unable to read the selected image for EXIF metadata.', error);
+                startUpload();
+            }
         }
     }
 

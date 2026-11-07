@@ -11,6 +11,7 @@
       "clear": "Rensa",
       "close": "Stäng",
       "copy": "Kopiera",
+      "copyDetails": "Kopiera detaljer",
       "delete": "Ta bort",
       "disable": "Inaktivera",
       "dismiss": "Avvisa",
@@ -41,11 +42,15 @@
       "show": "Visa",
       "signOut": "Logga ut",
       "signUp": "Anmäl dig",
+      "suppress": "Tysta",
+      "suppressed": "Tystad",
       "tryAgain": "igen",
       "unblock": "Avblockera",
       "unfollow": "Sluta följa",
+      "unsuppress": "Ta bort tystning",
       "update": "Uppdatering",
-      "upload": "Ladda upp"
+      "upload": "Ladda upp",
+      "toTheTop": "Till toppen"
     },
     "articleVisibility": {
       "homeSignIn": "Hem - logga in",
@@ -148,6 +153,7 @@
       "unrecoverableState": "Ett fel uppstod och programtillståndet kan inte återställas. Vänligen ladda om sidan."
     },
     "pageTitles": {
+      "directMessages": "Privata meddelanden",
       "accessForbidden": "Vernissage - Tillgång förbjuden",
       "account": "Vernissage - Konto",
       "activityPubEventRecipients": "Vernissage - ActivityPub-händelsemottagare",
@@ -155,6 +161,10 @@
       "articles": "Vernissage - Artiklar",
       "bookmarks": "Vernissage - Bokmärken",
       "categories": "Vernissage - Kategorier",
+      "cameras": "Vernissage - Kameror",
+      "explore": "Vernissage - Utforska",
+      "films": "Vernissage - Filmer",
+      "lenses": "Vernissage - Objektiv",
       "confirmEmail": "Vernissage - Bekräfta e-post",
       "connectionLost": "Vernissage - Anslutningen förlorad",
       "createArticle": "Vernissage - Skapa artikel",
@@ -244,6 +254,8 @@
         "doYouWantToDeleteCategory": "Vill du ta bort kategori?"
       },
       "texts": {
+        "alwaysRecalculateRemoteStatusCategory": "Beräkna alltid om kategorin för fjärrstatusar",
+        "alwaysRecalculateRemoteStatusCategoryDescription": "När detta är aktiverat beräknas kategorierna för inkommande ActivityPub-statusar om utifrån de lokala reglerna för hashtaggskategorier. Om ingen matchande regel hittas används kategorin från fjärrservern.",
         "categoryName": "Kategorinamn",
         "newCategory": "Ny kategori"
       }
@@ -284,6 +296,7 @@
     },
     "followButtons": {
       "actions": {
+        "directMessage": "Privat meddelande",
         "approveFollow": "Godkänn följ",
         "blockDomain": "Blockera domän",
         "blockUser": "Blockera användare",
@@ -497,6 +510,9 @@
         "isRegistrationOpened": "Är registreringen öppen",
         "isWebPushEnabled": "ÄrWebPush-aviseringar aktiverade",
         "showCategoriesForAnonymous": "Visa kategorier för anonym användare",
+        "showCamerasForAnonymous": "Visa kameror för anonym användare",
+        "showLensesForAnonymous": "Visa objektiv för anonym användare",
+        "showFilmsForAnonymous": "Visa filmer för anonym användare",
         "showEditorsStatusesChoiceForAnonymous": "Visa redaktörens statusval för anonym användare",
         "showEditorsUsersChoiceForAnonymous": "Visa redaktörens användares val för anonym användare",
         "showHashtagsForAnonymous": "Visa hashtags för anonym användare",
@@ -516,9 +532,10 @@
       "applicationLogo": "Applikationslogotyp",
       "menuWithActions": "Meny med åtgärder",
       "navigation": {
+        "directMessages": "Privata meddelanden",
         "account": "konto",
         "articles": "Artiklar",
-        "categories": "Kategorier",
+        "explore": "Utforska",
         "editorsChoice": "Redaktörens val",
         "errors": "Fel",
         "events": "Händelser",
@@ -702,6 +719,7 @@
         "software": "Programvara:",
         "tooLongAltText": "För lång alt-text.",
         "uploading": "Laddar upp...",
+        "useGeohash": "Använd Geohash",
         "warning": "Varning:",
         "withoutALicense": "Utan licens"
       }
@@ -719,6 +737,44 @@
     }
   },
   "dialogs": {
+    "preserveContentCredentials": {
+      "originalTitle": "Upload the original photo?",
+      "originalPrompt": "Would you like to upload “{fileName}” in its original form? All metadata will be preserved, including EXIF location data if present.",
+      "originalBenefits": "The original file preserves the exact image data, color profile and detail, which can matter for photography such as astrophotography.",
+      "standardProcessing": "Choose No to remove metadata and re-export the photo as JPEG. C2PA Content Credentials, if present, will not be preserved.",
+      "title": "Preserve C2PA Content Credentials?",
+      "detected": "The file “{fileName}” contains C2PA Content Credentials.",
+      "metadata": "To preserve these credentials, the original file must be stored and distributed with all of its embedded metadata, including location data if present.",
+      "privacy": "Continue only if you are sure the file contains no information you wish to keep private or that could put your privacy at risk. This original file, including all metadata, will be sent to your followers’ servers.",
+      "no": "No",
+      "yes": "Yes, I’m sure"
+    },
+    "contentCredentials": {
+      "labels": {
+        "actions": "Actions",
+        "format": "Format",
+        "ingredients": "Ingredients",
+        "producedWith": "Produced with",
+        "signedAt": "Signed at",
+        "signedBy": "Signed by",
+        "title": "Title",
+        "identity": "Identity",
+        "actionsCount": "Actions count",
+        "verify": "Verify",
+        "appOrDeviceUsed": "App or device used"
+      },
+      "texts": {
+        "verifiedSummary": "The image contains a valid C2PA manifest and passed client-side validation.",
+        "validationCaution": "This does not necessarily mean the image was forged. Re-exporting or processing the image on another server can also break validation.",
+        "validationErrors": "Validation error details",
+        "signatureMismatch": "The C2PA signature is invalid.",
+        "hashMismatch": "The hash of the image or an ingredient does not match the C2PA manifest."
+      },
+      "title": "Content Credentials",
+      "actions": {
+        "openOnVerifySite": "Open on Verify Site"
+      }
+    },
     "category": {
       "attrs": {
         "categoryName": "Kategorinamn",
@@ -853,6 +909,15 @@
         "requestSent": "Begäran har skickats"
       }
     },
+    "geohash": {
+      "texts": {
+        "enterGeohash": "Ange geohash",
+        "geohash": "Geohash",
+        "geohashIsNotValid": "Geohash är inte giltig",
+        "latitude": "Latitud",
+        "longitude": "Longitud"
+      }
+    },
     "homeCard": {
       "attrs": {
         "homeCardTitle": "Hemkorts titel",
@@ -967,6 +1032,7 @@
         "webPushPublicKeyIsNotSet": "Den offentliga webbnyckeln är inte inställd."
       },
       "texts": {
+        "newDirectMessage": "Nytt privat meddelande",
         "boostedStatus": "Boostad status",
         "newCommentAdded": "Ny kommentar tillagd",
         "newFollowRequest": "Ny följningsförfrågan",
@@ -1490,6 +1556,40 @@
     }
   },
   "pages": {
+    "directMessages": {
+      "emailVerificationRequired": "Verifiera din e-postadress innan du skickar ett meddelande.",
+      "like": "Gilla meddelande",
+      "unlike": "Ta bort gilla-markering från meddelandet",
+      "liked": "Gillat meddelande",
+      "deleteMessage": "Ta bort meddelande",
+      "confirmDelete": "Är du säker på att du vill ta bort det här meddelandet?",
+      "deletedMessage": "Det här meddelandet har tagits bort av användaren.",
+      "privacyNotice": "Privata meddelanden är inte totalsträckskrypterade. Dela inte känslig information.",
+      "title": "Privata meddelanden",
+      "subtitle": "Privata samtal i fediversum.",
+      "newMessage": "Nytt meddelande",
+      "conversations": "Samtal",
+      "searchConversations": "Sök bland samtal",
+      "image": "Bild",
+      "unread": "Olästa meddelanden",
+      "loadError": "Det gick inte att läsa in meddelandena. Försök igen.",
+      "noResults": "Inga matchande samtal.",
+      "noConversations": "Inga samtal ännu.",
+      "removeRecipient": "Ta bort mottagare",
+      "participants": "{count, plural, one {# deltagare} other {# deltagare}}",
+      "searchUser": "Sök efter en mottagare",
+      "add": "Lägg till",
+      "mute": "Tysta samtal",
+      "unmute": "Slå på aviseringar för samtalet",
+      "history": "Meddelandehistorik",
+      "olderMessages": "Läs in äldre meddelanden",
+      "chooseRecipients": "Sök efter en användare och klicka på Lägg till för att starta ett samtal.",
+      "removeImage": "Ta bort bild",
+      "writeMessage": "Skriv ett meddelande...",
+      "addImage": "Lägg till bild",
+      "selectConversation": "Välj ett samtal eller börja på ett nytt meddelande.",
+      "invalidImage": "Välj en bild i ett format som stöds och som inte överskrider serverns filstorleksgräns."
+    },
     "account": {
       "avatar": {
         "removeAriaLabel": "Ta bort avatar",
@@ -1812,9 +1912,22 @@
     "bookmarks": {
       "title": "Bokmärken"
     },
-    "categories": {
-      "subtitle": "En lista över kategorier på servern tillsammans med bilderna som tilldelats dem.",
-      "title": "Kategorier"
+    "explore": {
+      "searchCriteria": "Sökkriterier",
+      "subtitles": {
+        "cameras": "Utforska bilder grupperade efter kamerorna de togs med.",
+        "categories": "Utforska bilder grupperade efter kategorierna som finns på den här servern.",
+        "films": "Utforska bilder grupperade efter filmerna de fotograferades på.",
+        "lenses": "Utforska bilder grupperade efter objektiven de togs med."
+      },
+      "tabAriaLabel": "Utforskningstyp",
+      "tabs": {
+        "cameras": "Kameror",
+        "categories": "Kategorier",
+        "films": "Filmer",
+        "lenses": "Objektiv"
+      },
+      "title": "Utforska"
     },
     "confirmEmail": {
       "error": {
@@ -1981,7 +2094,7 @@
         "description": "Ja.Vernissageerbjuder omfattande tangentbordsnavigering för användare som hjälper dig att snabbt flytta mellan sidor, tidslinjer och åtgärder.",
         "footer": "Dessa genvägar är utformade för att förbättra tillgängligheten och påskynda din surfning - särskilt användbara för tangentbordscentrerade användare.",
         "globalShortcuts": {
-          "categories": "Visa kategorier",
+          "explore": "Öppna Utforska",
           "editorsChoice": "Öppna tidslinjen för Editor's Choice",
           "faq": "Öppna denna FAQ-sida",
           "home": "Gå till tidslinjen Hem",
@@ -1994,8 +2107,10 @@
         "statusDetailShortcuts": {
           "bookmark": "Spara statusen till bokmärken",
           "boost": "Öka statusen",
+          "closePhotoPreview": "Stäng förhandsvisning av foto",
           "like": "Gillar statusen",
           "nextStatus": "Se nästa status",
+          "openPhotoPreview": "Öppna förhandsvisning av foto",
           "previousStatus": "Visa föregående status"
         },
         "statusDetailShortcutsTitle": "På en statusdetaljsida:",
@@ -2083,6 +2198,7 @@
     },
     "notifications": {
       "actions": {
+        "openConversation": "Öppna samtal",
         "openUserProfileAriaLabel": "Öppna användarprofilen",
         "refreshCurrentTimelineAriaLabel": "Uppdatera aktuell tidslinje"
       },
@@ -2093,7 +2209,9 @@
       "types": {
         "adminReport": "har rapporterats",
         "adminSignUp": "är en ny användare",
+        "directMessage": "skickade ett privat meddelande till dig",
         "favouriteComment": "favoriserade din kommentar",
+        "favouriteConversationComment": "gillade din kommentar i ett samtal",
         "favouriteStatus": "favoritmarkerade ditt foto",
         "follow": "följde dig",
         "followRequest": "vill följa dig",
@@ -2118,6 +2236,10 @@
         "title": "Användarens profilgalleri"
       },
       "media": {
+        "alwaysAskToUploadOriginalImage": {
+          "title": "Always ask about uploading the original photo",
+          "description": "Before each upload, choose whether to remove metadata and re-export the photo as JPEG, or preserve the original file with all metadata, including EXIF location data if present."
+        },
         "alwaysShowNsfw": {
           "description": "Tvinga visa alla NSFW (känsliga) media utan varningar.",
           "title": "Visa alltid NSFW"
@@ -2129,6 +2251,10 @@
         "autoScrollGalleryImages": {
           "description": "Går automatiskt igenom statusbilder var sjätte sekund.",
           "title": "Rulla bilder automatiskt i statusgalleriet"
+        },
+        "hideAiFeatures": {
+          "description": "Döljer AI-knappar och tillhörande texter när du lägger till foton.",
+          "title": "Dölj AI-funktioner"
         },
         "showAlternativeText": {
           "description": "Visa alternativ text om den finns på skärmen med statusdetaljer.",
@@ -2171,6 +2297,10 @@
       "actions": {
         "profileQrCodeAriaLabel": "ProfilQR-kod",
         "shareBusinessCardAriaLabel": "Dela visitkort"
+      },
+      "accountModeration": {
+        "blocked": "Det här kontot har blockerats av en servermoderator. Det kan inte följa eller följas av konton på den här servern, och dess inlägg visas inte här.",
+        "suppressed": "Det här kontot har tystats av en servermoderator. Det kan fortfarande följa och följas av konton på den här servern, men nya bilder som det publicerar kommer inte att visas någonstans på webbplatsen."
       },
       "confirmations": {
         "createBusinessCard": "Du har inte skapat ett visitkort än. Vill du skapa den nu?"
@@ -2223,6 +2353,7 @@
         "emailRequired": "Ange e-post.",
         "emailTaken": "Välj annan e-postadress, den här är redan kopplad till ett annat konto.",
         "invalidCaptchaCode": "Captcha-koden är ogiltig. Försök igen.",
+        "registrationIsDisabled": "Registrering utan inbjudningskod eller en anledning till att gå med är inaktiverad.",
         "invitationCodeRequired": "Ange inbjudningskoden.",
         "invitationCodeTooLong": "Inbjudningskoden är för lång.",
         "invitationTokenInvalid": "Inbjudanstoken är ogiltig.",
@@ -2338,6 +2469,7 @@
         "users": "Inga användare hittades."
       },
       "hint": "Sök efter en användare, status eller hashtag, eller klistra in enURLi en status eller användarprofil.",
+      "showOnlyMyStatuses": "Visa endast mina statusar",
       "tabs": {
         "hashtags": "Hashtags",
         "statuses": "Statuser",
@@ -2431,6 +2563,23 @@
       },
       "confirmations": {
         "changeStatusWithEnteredComment": "Du har skrivit en kommentar. Vill du ändra status ändå?"
+      },
+      "contentCredentials": {
+        "label": "Content Credentials",
+        "verified": "Content Credentials verified",
+        "title": "Content Credentials",
+        "author": "Author",
+        "equipmentOrApplication": "Equipment/Application",
+        "details": "Details",
+        "appOrDeviceUsed": "App or device used",
+        "aiGenerated": "AI Generated",
+        "validation": {
+          "verified": "C2PA integrity and signature trust verified",
+          "untrusted": "Integrity verified. Certificate issuer not verified",
+          "invalid": "C2PA integrity verification failed",
+          "unknown": "C2PA verification result is unavailable"
+        },
+        "unverifiedMetadata": "The author, device and image history shown below are unverified."
       },
       "followedTagsInThisStatus": "Följde taggar i denna status",
       "hashtagsAriaLabel": "Hashtags",
@@ -2598,6 +2747,8 @@
         "tooManyFilesSelectedSingular": "För många filer har valts. Du kan lägga till en bild till.",
         "tooManyFilesSelectedPlural": "För många filer har valts. Du kan lägga till {count} bilder till.",
         "unableToResize": "Det gick inte att ändra storlek på bilden före uppladdning.",
+        "uploadFailed": "Det gick inte att ladda upp bilden. Kontrollera anslutningen och försök lägga till filen igen.",
+        "uploadFailedTitle": "Bilduppladdningen misslyckades",
         "unsupportedFileType": "Denna filtyp stöds inte. Ladda upp enJPG-,PNG- eller WEBP-bild.",
         "verifyEmailBeforePublish": "För att publicera en status, vänligen verifiera din e-postadress först."
       },
@@ -2639,7 +2790,8 @@
       },
       "filters": {
         "onlyBlocked": "Endast blockerad",
-        "onlyLocal": "Endast lokalt"
+        "onlyLocal": "Endast lokalt",
+        "onlySuppressed": "Endast tystade"
       },
       "messages": {
         "accountApproved": "Kontot har godkänts.",
@@ -2650,6 +2802,8 @@
         "accountMarkedAsSupporter": "Kontot har markerats som supporter.",
         "accountRefreshed": "Kontot har uppdaterats.",
         "accountRejected": "Kontot har avvisats.",
+        "accountSuppressed": "Användaren har tystats.",
+        "accountUnsuppressed": "Användaren är inte längre tystad.",
         "twoFactorDisabled": "2FAhar inaktiverats.",
         "userBlocked": "Användaren har blockerats.",
         "userUnblocked": "Användaren har avblockerats."

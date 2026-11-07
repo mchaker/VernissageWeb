@@ -6,8 +6,8 @@ import { ResponsiveComponent } from 'src/app/common/responsive';
 import { AuthorizationService } from 'src/app/services/authorization/authorization.service';
 import { Role } from 'src/app/models/role';
 import { PagedResult } from 'src/app/models/paged-result';
-import { PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { ActivatedRoute, NavigationExtras, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UsersService } from 'src/app/services/http/users.service';
@@ -16,14 +16,31 @@ import { AvatarSize } from 'src/app/components/widgets/avatar/avatar-size';
 import { UserRolesDialog } from 'src/app/dialogs/user-roles-dialog/user-roles.dialog';
 import { RandomGeneratorService } from 'src/app/services/common/random-generator.service';
 import { ConfirmationDialog } from 'src/app/dialogs/confirmation-dialog/confirmation.dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { InputActivityDirective } from '../../directives/input-activity.directive';
+import { MatInput } from '@angular/material/input';
+import { MatSelect, MatOption } from '@angular/material/select';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { AvatarComponent } from '../../components/widgets/avatar/avatar.component';
+import { MatChipSet, MatChipOption } from '@angular/material/chips';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { LocalizedDatePipe } from '../../pipes/localized-date.pipe';
 
 @Component({
     selector: 'app-users',
     templateUrl: './users.page.html',
     styleUrls: ['./users.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatCard, MatCardContent, FormsModule, MatFormField, InputActivityDirective, MatInput, MatLabel, MatSelect, MatOption, MatButton, MatCheckbox, MatRadioGroup, MatRadioButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, RouterLink, AvatarComponent, MatChipSet, MatChipOption, MatIcon, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, LocalizedDatePipe]
 })
 export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy {
     protected readonly avatarSize = AvatarSize
@@ -34,6 +51,7 @@ export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy 
     protected sortDirection = model('descending');
     protected onlyLocal = model(false);
     protected onlyBlocked = model(false);
+    protected onlySuppressed = model(false);
     protected isReady = signal(false);
     protected users = signal<PagedResult<User> | undefined>(undefined);
     protected pageIndex = signal(0);
@@ -70,6 +88,7 @@ export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy 
             const query = params['query'] as string;
             const local = params['onlyLocal'] as string;
             const blocked = params['onlyBlocked'] as string;
+            const suppressed = params['onlySuppressed'] as string;
             const sortColumn = params['sortColumn'] as string;
             const sortDirection = params['sortDirection'] as string;
 
@@ -80,10 +99,11 @@ export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy 
             this.search.set(query);
             this.onlyLocal.set(local === 'true');
             this.onlyBlocked.set(blocked === 'true');
+            this.onlySuppressed.set(suppressed === 'true');
             this.sortColumn.set(sortColumn ?? 'createdAt');
             this.sortDirection.set(sortDirection === 'ascending' ? 'ascending' : 'descending');
 
-            const downloadedUsers = await this.usersService.get(page + 1, size, query, this.onlyLocal(), this.onlyBlocked(), this.sortColumn(), this.sortDirection());
+            const downloadedUsers = await this.usersService.get(page + 1, size, query, this.onlyLocal(), this.onlyBlocked(), this.onlySuppressed(), this.sortColumn(), this.sortDirection());
             this.users.set(downloadedUsers);
 
             this.isReady.set(true);
@@ -102,6 +122,7 @@ export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy 
                 query: this.search(),
                 onlyLocal: this.onlyLocal(),
                 onlyBlocked: this.onlyBlocked(),
+                onlySuppressed: this.onlySuppressed(),
                 sortColumn: this.sortColumn(),
                 sortDirection: this.sortDirection() 
             },
@@ -152,6 +173,34 @@ export class UsersPage extends ResponsiveComponent implements OnInit, OnDestroy 
                 this.messageService.showSuccess(user.isLocal
                     ? this.translateService.instant('pages.users.messages.accountDisabled')
                     : this.translateService.instant('pages.users.messages.userBlocked'));
+            }
+        } catch (error) {
+            console.error(error);
+            this.messageService.showServerError(error);
+        }
+    }
+
+    protected async onSuppress(user: User): Promise<void> {
+        try {
+            if (user.userName) {
+                await this.usersService.suppress(user.userName);
+
+                user.isSuppressed = true;
+                this.messageService.showSuccess(this.translateService.instant('pages.users.messages.accountSuppressed'));
+            }
+        } catch (error) {
+            console.error(error);
+            this.messageService.showServerError(error);
+        }
+    }
+
+    protected async onUnsuppress(user: User): Promise<void> {
+        try {
+            if (user.userName) {
+                await this.usersService.unsuppress(user.userName);
+
+                user.isSuppressed = false;
+                this.messageService.showSuccess(this.translateService.instant('pages.users.messages.accountUnsuppressed'));
             }
         } catch (error) {
             console.error(error);

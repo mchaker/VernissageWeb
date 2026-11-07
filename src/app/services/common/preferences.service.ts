@@ -113,12 +113,60 @@ export class PreferencesService {
         this.cookieService.set('autoScrollGalleryImages', autoScrollGalleryImages ? 'true' : 'false', { expires: this.longFuture });
     }
 
+    public get hideAiFeatures(): boolean {
+        return (this.cookieService.get('hideAiFeatures') ?? 'false') === 'true';
+    }
+
+    public set hideAiFeatures(hideAiFeatures: boolean) {
+        this.cookieService.set('hideAiFeatures', hideAiFeatures ? 'true' : 'false', { expires: this.longFuture, path: '/' });
+    }
+
+    public get alwaysAskToUploadOriginalImage(): boolean {
+        return (this.cookieService.get('alwaysAskToUploadOriginalImage') ?? 'false') === 'true';
+    }
+
+    public set alwaysAskToUploadOriginalImage(value: boolean) {
+        this.cookieService.set('alwaysAskToUploadOriginalImage', value ? 'true' : 'false', { expires: this.longFuture, path: '/' });
+    }
+
     public get language(): string | null {
         return this.cookieService.get('language') || null;
     }
 
     public set language(language: string) {
         this.cookieService.set('language', language, { expires: this.longFuture, path: '/' });
+    }
+
+    public get homeTab(): string {
+        return this.cookieService.get('homeTab') || 'private';
+    }
+
+    public set homeTab(homeTab: string) {
+        this.cookieService.set('homeTab', homeTab, { expires: this.longFuture, path: '/' });
+    }
+
+    public get editorsTab(): string {
+        return this.cookieService.get('editorsTab') || 'statuses';
+    }
+
+    public set editorsTab(editorsTab: string) {
+        this.cookieService.set('editorsTab', editorsTab, { expires: this.longFuture, path: '/' });
+    }
+
+    public get exploreTab(): string {
+        return this.cookieService.get('exploreTab') || 'categories';
+    }
+
+    public set exploreTab(exploreTab: string) {
+        this.cookieService.set('exploreTab', exploreTab, { expires: this.longFuture, path: '/' });
+    }
+
+    public get trendingTab(): string {
+        return this.cookieService.get('trendingTab') || 'statuses';
+    }
+
+    public set trendingTab(trendingTab: string) {
+        this.cookieService.set('trendingTab', trendingTab, { expires: this.longFuture, path: '/' });
     }
 
     public toggleTheme(renderer: Renderer2): void {

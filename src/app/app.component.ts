@@ -9,17 +9,20 @@ import { SettingsService } from './services/http/settings.service';
 import { WebServiceWorker } from './services/common/web-service-worker.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FocusTrackerService } from './services/common/focus-tracker.service';
-import { Router, RouteReuseStrategy } from '@angular/router';
+import { Router, RouteReuseStrategy, RouterOutlet } from '@angular/router';
 import { CustomReuseStrategy } from './common/custom-reuse-strategy';
 import { AuthorizationService } from './services/authorization/authorization.service';
 import { TranslateService } from '@ngx-translate/core';
+import { HeaderComponent } from './components/core/header/header.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { RouteFocusDirective } from './directives/route-focus.directive';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [HeaderComponent, MatProgressSpinner, RouterOutlet, RouteFocusDirective]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     protected showLoader = signal(false);
@@ -96,7 +99,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.router.navigate(['/editors']);
                 break;
             case 'c':
-                this.router.navigate(['/categories']);
+                this.router.navigate(['/explore']);
                 break;
             case 'n':
                 this.router.navigate(['/news']);

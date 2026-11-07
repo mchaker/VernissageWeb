@@ -10,10 +10,13 @@ export class UploadPhoto {
     public isDeleting = signal(false);
     public isUploading = signal(false);
     public uploadProgress = signal(0);
+    public uploadError = signal<string | undefined>(undefined);
+    public uploadErrorDetails = signal<string | undefined>(undefined);
 
     public blurhash?: string;
     public photoFile?: Blob;
     public photoResizedFile?: Blob;
+    public useOriginalImage = false;
     public photoHdrFile?: Blob;
     public photoHdrSrc?: string;
     public isHdrUploaded = false;

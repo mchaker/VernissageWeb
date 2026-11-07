@@ -14,13 +14,27 @@ import { MessagesService } from 'src/app/services/common/messages.service';
 import { FocusTrackerService } from 'src/app/services/common/focus-tracker.service';
 import { RandomGeneratorService } from 'src/app/services/common/random-generator.service';
 import { LanguageService } from 'src/app/services/common/language.service';
+import { PreferencesService } from 'src/app/services/common/preferences.service';
+
+import { ArticleInlineComponent } from '../article-inline/article-inline.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { FormsModule } from '@angular/forms';
+import { GalleryComponent } from '../gallery/gallery.component';
+import { TranslatePipe } from '@ngx-translate/core';
+import { TimelineKind } from 'src/app/models/timeline-kind';
+import { LinkableResult } from 'src/app/models/linkable-result';
+import { TimelineMarkersService } from 'src/app/services/http/timeline-markers.service';
+import { Status } from 'src/app/models/status';
+import { ReleaseFocusOnPointerClickDirective } from 'src/app/directives/release-focus-on-pointer-click.directive';
 
 @Component({
     selector: 'app-home-signin',
     templateUrl: './home-signin.component.html',
     styleUrls: ['./home-signin.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [ArticleInlineComponent, MatIconButton, MatIcon, MatButtonToggleGroup, FormsModule, MatButtonToggle, GalleryComponent, TranslatePipe, ReleaseFocusOnPointerClickDirective]
 })
 export class HomeSigninComponent extends ReusableGalleryPageComponent implements OnInit, OnDestroy {
     protected timeline = model('private');
@@ -41,6 +55,8 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
     private focusTrackerService = inject(FocusTrackerService);
     private randomGeneratorService = inject(RandomGeneratorService);
     private languageService = inject(LanguageService);
+    private timelineMarkersService = inject(TimelineMarkersService);
+    private preferencesService = inject(PreferencesService);
 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
@@ -51,9 +67,22 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
                 return;
             }
 
-            this.loadingService.showLoader();
+            this.isLoggedIn.set(await this.authorizationService.isLoggedIn());
+            const requestedPageType = params['t'] as string | undefined ?? this.preferencesService.homeTab;
+            const pageType = this.resolveTimeline(requestedPageType);
 
-            const pageType = params['t'] as string;
+            // Preserve the original timeline even after the stored preference changes.
+            if (params['t'] !== pageType) {
+                await this.router.navigate([], {
+                    relativeTo: this.activatedRoute,
+                    queryParams: { t: pageType },
+                    queryParamsHandling: 'merge',
+                    replaceUrl: true
+                });
+                return;
+            }
+
+            this.loadingService.showLoader();
             await Promise.all([
                 this.loadData(pageType),
                 this.loadArticles()
@@ -101,12 +130,15 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
 
         switch (event.key) {
             case '1':
+                this.preferencesService.homeTab = 'private';
                 this.router.navigate(['/home'], { queryParams: { t: 'private' } });
                 break;
             case '2':
+                this.preferencesService.homeTab = 'local';
                 this.router.navigate(['/home'], { queryParams: { t: 'local' } });
                 break;
             case '3':
+                this.preferencesService.homeTab = 'global';
                 this.router.navigate(['/home'], { queryParams: { t: 'global' } });
                 break;
         }
@@ -122,6 +154,8 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
     }
 
     protected onTimelineChange(): void {
+        this.preferencesService.homeTab = this.timeline();
+
         const navigationExtras: NavigationExtras = {
             queryParams: {
                 t: this.timeline()
@@ -150,29 +184,34 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
 
         this.lastRefreshTime = new Date();
 
-        switch(pageType) {
+        switch(this.resolveTimeline(pageType)) {
             case 'local': {
                 this.timeline.set('local');
                 const statuses = await this.timelineService.public(undefined, undefined, undefined, undefined, true);
-                statuses.context = ContextTimeline.local;
+                this.updateTimelineMarker(TimelineKind.local, statuses);
 
+                statuses.context = ContextTimeline.local;
                 this.statuses.set(statuses);
+
                 break;
             }
             case 'global': {
                 this.timeline.set('global');
                 const statuses = await this.timelineService.public(undefined, undefined, undefined, undefined, false);
-                statuses.context = ContextTimeline.global;
+                this.updateTimelineMarker(TimelineKind.federated, statuses);
 
+                statuses.context = ContextTimeline.global;
                 this.statuses.set(statuses);
+
                 break;
             }
             default:
                 if (this.isLoggedIn()) {
                     this.timeline.set('private');
                     const statuses = await this.timelineService.home();
-                    statuses.context = ContextTimeline.home;
+                    this.updateTimelineMarker(TimelineKind.signInPrivate, statuses);
 
+                    statuses.context = ContextTimeline.home;
                     this.statuses.set(statuses);
                 } else {
                     this.timeline.set('local');
@@ -183,6 +222,18 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
                 }
                 break;
         }
+    }
+
+    private resolveTimeline(requestedTimeline: string): string {
+        if (requestedTimeline === 'private' && this.isLoggedIn()) {
+            return requestedTimeline;
+        }
+
+        if (requestedTimeline === 'local' || requestedTimeline === 'global') {
+            return requestedTimeline;
+        }
+
+        return this.isLoggedIn() ? 'private' : 'local';
     }
 
     private async loadArticles(): Promise<void> {
@@ -207,5 +258,22 @@ export class HomeSigninComponent extends ReusableGalleryPageComponent implements
         }
 
         return false;
+    }
+
+    private async updateTimelineMarker(timelineKind: TimelineKind, statuses: LinkableResult<Status>): Promise<void> {
+        if (!this.isLoggedIn()) {
+            return;
+        }
+
+        if (statuses.data.length === 0) {
+            return;
+        }
+
+        try {
+            const firstStatus = statuses.data[0];
+            await this.timelineMarkersService.post(timelineKind, firstStatus.id);
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
