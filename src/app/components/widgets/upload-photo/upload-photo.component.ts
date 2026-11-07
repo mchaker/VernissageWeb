@@ -32,8 +32,10 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatDatepickerInput, MatDatepicker, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatTimepickerInput, MatTimepicker, MatTimepickerToggle } from '@angular/material/timepicker';
 import { AsyncPipe } from '@angular/common';
-//import { MatDialog } from '@angular/material/dialog';
-//import { GeohashDialog, GeohashDialogResult } from 'src/app/dialogs/geohash-dialog/geohash.dialog';
+/* Geohash disabled.
+import { MatDialog } from '@angular/material/dialog';
+import { GeohashDialog, GeohashDialogResult } from 'src/app/dialogs/geohash-dialog/geohash.dialog';
+*/
 
 @Component({
     selector: 'app-upload-photo',
@@ -94,13 +96,14 @@ export class UploadPhotoComponent extends ResponsiveComponent implements OnInit 
     override async ngOnInit(): Promise<void> {
         super.ngOnInit();
 
-        // AI features disabled.
-        //this.isOpenAIEnabled.set(this.settingsService.publicSettings?.isOpenAIEnabled ?? false);
+        //this.isOpenAIEnabled.set(this.settingsService.publicSettings?.isOpenAIEnabled ?? false); // AI features disabled.
         //this.allCountries = await this.countriesService.all();
         this.hdrFileSizeString.set(this.fileSizeService.getHumanFileSize(this.defaultMaxHdrFileSize, 0));
 
-        //const internalOpenAIProviderName = this.settingsService.publicSettings?.openAIProviderName?.trim() || 'OpenAI';
-        //this.openAIProviderName.set(internalOpenAIProviderName);
+        /* AI features disabled.
+        const internalOpenAIProviderName = this.settingsService.publicSettings?.openAIProviderName?.trim() || 'OpenAI';
+        this.openAIProviderName.set(internalOpenAIProviderName);
+        */
 
         const maxFileSize = this.instanceService.instance?.configuration?.attachments?.imageSizeLimit ?? this.defaultMaxFileSize;
         this.maxFileSizeString.set(this.fileSizeService.getHumanFileSize(maxFileSize, 0));

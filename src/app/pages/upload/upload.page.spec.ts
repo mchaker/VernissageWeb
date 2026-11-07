@@ -240,6 +240,7 @@ describe('photo upload errors', () => {
     });
 });
 
+/* C2PA disabled.
 describe('C2PA upload consent', () => {
     function createPage(hasCredentials: boolean, consent?: boolean): any {
         const page = Object.create(UploadPage.prototype) as any;
@@ -343,3 +344,4 @@ describe('C2PA upload consent', () => {
         expect((data.get('file') as Blob).size).toBe(preserve ? photo.photoFile.size : photo.photoResizedFile.size);
     });
 });
+*/

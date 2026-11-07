@@ -108,11 +108,13 @@
                             </mat-slide-toggle>
                         </div>
 
+                        <!-- C2PA disabled.
                         <div class="margin-bottom-20">
                             <mat-slide-toggle name="alwaysAskToUploadOriginalImage" [(ngModel)]="alwaysAskToUploadOriginalImage" (ngModelChange)="onAlwaysAskToUploadOriginalImageChange()">
                                 {{ 'pages.preferences.media.alwaysAskToUploadOriginalImage.title' | translate }} <div class="text-muted fs-90">{{ 'pages.preferences.media.alwaysAskToUploadOriginalImage.description' | translate }}</div>
                             </mat-slide-toggle>
                         </div>
+                        -->
 
                         <div class="margin-bottom-20">
                             <mat-slide-toggle name="autoScrollGalleryImages" [(ngModel)]="autoScrollGalleryImages" (ngModelChange)="onAutoScrollGalleryImagesChange()">
@@ -120,6 +122,7 @@
                             </mat-slide-toggle>
                         </div>
 
+                        <!-- AI features disabled.
                         @if (isOpenAIEnabled()) {
                             <div class="margin-bottom-20">
                                 <mat-slide-toggle name="hideAiFeatures" [(ngModel)]="hideAiFeatures" (ngModelChange)="onHideAiFeaturesChange()">
@@ -127,6 +130,7 @@
                                 </mat-slide-toggle>
                             </div>
                         }
+                        -->
                     </mat-card-content>
                 </mat-card>
             </div>

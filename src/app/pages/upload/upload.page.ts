@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, model, OnInit, signal, viewChild } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
+/* C2PA disabled.
 import { firstValueFrom } from 'rxjs';
 import { C2paService } from 'src/app/services/common/c2pa.service';
 import { PreserveContentCredentialsDialog } from 'src/app/dialogs/preserve-content-credentials-dialog/preserve-content-credentials.dialog';
 import { PreserveContentCredentialsDialogData } from 'src/app/models/preserve-content-credentials-dialog-data';
+*/
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { encode } from 'blurhash';
 import * as ExifReader from 'exifreader';
@@ -123,7 +125,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
     private loadingService = inject(LoadingService);
     private authorizationService = inject(AuthorizationService);
     private canonExifService = inject(CanonExifService);
-    private c2paService = inject(C2paService);
+    //private c2paService = inject(C2paService); // C2PA disabled.
     private deviceDetectorService = inject(DeviceDetectorService);
     private translateService = inject(TranslateService);
 
@@ -243,6 +245,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
         const uploadPhoto = new UploadPhoto(photoUuid);
         uploadPhoto.photoFile = file;
 
+        /* C2PA disabled.
         const hasContentCredentials = await this.c2paService.hasContentCredentials(file);
         if (hasContentCredentials || this.preferencesService.alwaysAskToUploadOriginalImage) {
             const dialogRef = this.dialog.open<PreserveContentCredentialsDialog, PreserveContentCredentialsDialogData, boolean>(PreserveContentCredentialsDialog, {
@@ -252,6 +255,7 @@ export class UploadPage extends ResponsiveComponent implements OnInit {
             });
             uploadPhoto.useOriginalImage = await firstValueFrom(dialogRef.afterClosed()) === true;
         }
+        */
 
         if (file.size > this.maxFileSize) {
             if (uploadPhoto.useOriginalImage || this.deviceDetectorService.deviceType() !== DeviceType.Mobile) {

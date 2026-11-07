@@ -39,9 +39,11 @@ import { UserPayload } from 'src/app/models/user-payload';
 import { ConfirmationDialog } from 'src/app/dialogs/confirmation-dialog/confirmation.dialog';
 import { CommentReplyComponent } from 'src/app/components/widgets/comment-reply/comment-reply.component';
 import { StatusHashtagsService } from 'src/app/services/common/status-hashtags.service';
+/* C2PA disabled.
 import { C2paContentCredentials } from 'src/app/models/c2pa-content-credentials';
 import { C2paService } from 'src/app/services/common/c2pa.service';
 import { ContentCredentialsDialog } from 'src/app/dialogs/content-credentials-dialog/content-credentials.dialog';
+*/
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -99,7 +101,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     protected rendered = signal<SafeHtml>('');
     protected hasHdrSupport = signal(false);
 
-    protected contentCredentials = signal<C2paContentCredentials | undefined>(undefined);
+    //protected contentCredentials = signal<C2paContentCredentials | undefined>(undefined); // C2PA disabled.
     protected pendingHighlightedCommentId = signal<string | undefined>(undefined);
     protected highlightedCommentId = signal<string | undefined>(undefined);
 
@@ -139,7 +141,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private mainGalleryId = 'mainGalleryId';
     private commentGalleryId = 'commentGalleryId';
     private blurhash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-    private contentCredentialsRequestId = 0;
+    //private contentCredentialsRequestId = 0; // C2PA disabled.
 
     private document = inject(DOCUMENT);
     private platformId = inject(PLATFORM_ID);
@@ -165,7 +167,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
     private focusTrackerService = inject(FocusTrackerService);
     private statusHashtagsService = inject(StatusHashtagsService);
     private translateService = inject(TranslateService);
-    private c2paService = inject(C2paService);
+    //private c2paService = inject(C2paService); // C2PA disabled.
 
     constructor() {
         super();
@@ -382,9 +384,9 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
     protected onImageIndexChange(event: any): void {
         this.currentIndex.set(event.currIndex);
-        void this.loadContentCredentialsForCurrentImage();
     }
 
+    /* C2PA disabled.
     protected openContentCredentialsDialog(): void {
         const internalContentCredentials = this.contentCredentials();
         if (!internalContentCredentials) {
@@ -396,6 +398,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
             data: internalContentCredentials
         });
     }
+    */
 
     protected async onReportDialog(reportedStatus: Status): Promise<void> {
         const dialogRef = this.dialog.open(ReportDialog, {
@@ -953,6 +956,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         return undefined;
     }
 
+    /* C2PA disabled.
     private async loadContentCredentialsForCurrentImage(): Promise<void> {
         const requestId = ++this.contentCredentialsRequestId;
         const attachment = this.mainStatus()?.attachments?.at(this.currentIndex());
@@ -969,6 +973,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
         this.contentCredentials.set(internalContentCredentials);
     }
+    */
 
     private getMapsUrl(index: number): string | undefined {
         const locationInternal = this.getLocation(index);
@@ -1076,7 +1081,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
         // Set main status data.
         this.status.set(downloadedStatus);
         this.replyStatus.set(undefined);
-        this.contentCredentials.set(undefined);
+        //this.contentCredentials.set(undefined); // C2PA disabled.
 
         // Calculate main status (for reblogs).
         const internalMainStatus = downloadedStatus.reblog ? downloadedStatus.reblog : downloadedStatus;
@@ -1119,7 +1124,7 @@ export class StatusPage extends ResponsiveComponent implements OnInit, OnDestroy
 
         this.images.set(internalImages);
         this.rendered.set(this.mainStatus()?.noteHtml ?? '');
-        void this.loadContentCredentialsForCurrentImage();
+        //void this.loadContentCredentialsForCurrentImage(); // C2PA disabled.
 
         // Load status histories asynchronously.
         this.loadStatusHistories(statusId);
